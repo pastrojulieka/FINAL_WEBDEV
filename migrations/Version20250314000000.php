@@ -19,7 +19,16 @@ final class Version20250314000000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE user ADD verification_token VARCHAR(100) DEFAULT NULL, ADD is_verified TINYINT(1) DEFAULT 0 NOT NULL');
+        $sm = $this->connection->createSchemaManager();
+        if ($sm->tablesExist(['user'])) {
+            $table = $sm->introspectTable('user');
+            if (!$table->hasColumn('verification_token')) {
+                $this->addSql('ALTER TABLE user ADD verification_token VARCHAR(100) DEFAULT NULL');
+            }
+            if (!$table->hasColumn('is_verified')) {
+                $this->addSql('ALTER TABLE user ADD is_verified TINYINT(1) DEFAULT 0 NOT NULL');
+            }
+        }
     }
 
     public function down(Schema $schema): void
