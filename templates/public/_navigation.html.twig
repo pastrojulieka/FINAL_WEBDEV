@@ -1,0 +1,182 @@
+<!-- NAVBAR -->
+<nav class="bg-white shadow-lg border-b-2 border-orange-100 sticky top-0 z-50">
+  <!-- Mobile menu toggle button for responsive view -->
+  <div class="max-w-7xl mx-auto px-6 py-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        {% set landingUrl = path('app_landing') %}
+        <a href="{{ landingUrl }}">
+          <img src="{{ asset('img/PL.png') }}" alt="Logo" class="h-12">
+        </a>
+      </div>
+
+      {% set onLanding = app.request.attributes.get('_route') == 'app_landing' %}
+      {% set currentRoute = app.request.attributes.get('_route') %}
+      {% set navItems = [
+        { 'label': 'Home', 'icon': 'fa-house', 'href': onLanding ? '#home' : (landingUrl ~ '#home'), 'hash': '#home', 'active': onLanding },
+        { 'label': 'About Us', 'icon': 'fa-info-circle', 'href': onLanding ? '#about' : (landingUrl ~ '#about'), 'hash': '#about', 'active': currentRoute == 'app_about' },
+        { 'label': 'Products', 'icon': 'fa-box', 'href': onLanding ? '#products' : (landingUrl ~ '#products'), 'hash': '#products', 'active': currentRoute == 'app_home' },
+        { 'label': 'Testimonials', 'icon': 'fa-quote-left', 'href': onLanding ? '#testimonials' : (landingUrl ~ '#testimonials'), 'hash': '#testimonials', 'active': currentRoute == 'app_testimonials' },
+        { 'label': 'Contact Us', 'icon': 'fa-envelope', 'href': onLanding ? '#contact' : (landingUrl ~ '#contact'), 'hash': '#contact', 'active': currentRoute == 'app_contact' },
+      ] %}
+      {% set activeClasses = 'text-orange-600 border-b-2 border-orange-500' %}
+      {% set defaultClasses = 'text-slate-600 hover:text-orange-600 hover:border-orange-200 border-b-2 border-transparent' %}
+
+      <!-- Desktop links -->
+      <div class="hidden md:flex items-center gap-4">
+        {% for item in navItems %}
+          <a
+            href="{{ item.href }}"
+            data-hash="{{ item.hash }}"
+            aria-current="{{ item.active ? 'page' : 'false' }}"
+            class="public-nav-link items-center gap-2 px-4 py-2 transition font-lato inline-flex {{ item.active ? activeClasses ~ ' font-semibold' : defaultClasses ~ ' font-medium' }}"
+          >
+            <i class="fa-solid {{ item.icon }}"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        {% endfor %}
+
+        {% if app.user %}
+          <div class="flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full">
+            <div class="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              {{ app.user.email|slice(0, 1)|upper }}
+            </div>
+            <span class="hidden sm:inline text-sm font-semibold text-gray-800">{{ app.user.email }}</span>
+          </div>
+
+          <a href="{{ path('app_logout') }}" class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-lg hover:shadow-lg transition">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </a>
+        {% else %}
+          <a href="{{ path('app_login') }}" class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-lg hover:shadow-lg transition inline-flex items-center gap-2">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            <span class="hidden sm:inline ml-2">Login</span>
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Mobile hamburger toggle -->
+      <div class="md:hidden flex items-center gap-3">
+        <button
+          id="mobileNavToggle"
+          type="button"
+          aria-controls="mobileNavMenu"
+          aria-expanded="false"
+          aria-label="Toggle menu"
+          class="inline-flex items-center justify-center p-2 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition"
+        >
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile dropdown -->
+  <div
+    id="mobileNavMenu"
+    class="hidden md:hidden border-t border-orange-100 bg-white shadow-lg"
+  >
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex flex-col gap-1">
+        {% for item in navItems %}
+          <a
+            data-mobile-nav="1"
+            href="{{ item.href }}"
+            data-hash="{{ item.hash }}"
+            aria-current="{{ item.active ? 'page' : 'false' }}"
+            class="public-nav-link flex items-center gap-2 px-4 py-3 rounded-lg transition font-lato inline-flex {{ item.active ? activeClasses ~ ' font-semibold' : defaultClasses ~ ' font-medium' }}"
+          >
+            <i class="fa-solid {{ item.icon }}"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        {% endfor %}
+
+        <div class="mt-3 border-t border-orange-100 pt-3">
+          {% if app.user %}
+            <div class="flex items-center gap-3 px-4 py-2">
+              <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                {{ app.user.email|slice(0, 1)|upper }}
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-900 font-montserrat">{{ app.user.email }}</p>
+                <p class="text-xs text-gray-500">Logged in</p>
+              </div>
+            </div>
+            <a href="{{ path('app_logout') }}" class="mx-4 mt-2 px-4 py-3 inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:shadow-lg transition">
+              <i class="fa-solid fa-right-from-bracket"></i>
+              Logout
+            </a>
+          {% else %}
+            <a href="{{ path('app_login') }}" class="mx-4 px-4 py-3 inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold hover:shadow-lg transition">
+              <i class="fa-solid fa-right-to-bracket"></i>
+              Login
+            </a>
+            <a href="{{ path('app_register') }}" class="mx-4 mt-2 px-4 py-3 inline-flex items-center justify-center gap-2 rounded-lg border border-orange-200 bg-white text-orange-700 font-semibold hover:bg-orange-50 transition">
+              <i class="fa-solid fa-user-plus"></i>
+              Register
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if onLanding %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var links = document.querySelectorAll('nav a.public-nav-link[data-hash]');
+        if (!links.length) {
+          return;
+        }
+
+        function updateActive() {
+          var hash = window.location.hash || '#home';
+          links.forEach(function(link) {
+            var isActive = link.dataset.hash === hash;
+            link.classList.toggle('text-orange-600', isActive);
+            link.classList.toggle('border-orange-500', isActive);
+            link.classList.toggle('font-semibold', isActive);
+            link.classList.toggle('text-slate-600', !isActive);
+            link.classList.toggle('border-transparent', !isActive);
+            link.classList.toggle('hover:text-orange-600', !isActive);
+            link.classList.toggle('hover:border-orange-200', !isActive);
+            link.setAttribute('aria-current', isActive ? 'page' : 'false');
+          });
+        }
+
+        var mobileToggle = document.getElementById('mobileNavToggle');
+        var mobileMenu = document.getElementById('mobileNavMenu');
+
+        function setMobileState(open) {
+          if (!mobileToggle || !mobileMenu) {
+            return;
+          }
+          mobileMenu.classList.toggle('hidden', !open);
+          mobileToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+
+        function closeMobileMenu() {
+          setMobileState(false);
+        }
+
+        if (mobileToggle && mobileMenu) {
+          mobileToggle.addEventListener('click', function() {
+            setMobileState(mobileMenu.classList.contains('hidden'));
+          });
+        }
+
+        links.forEach(function(link) {
+          link.addEventListener('click', function() {
+            setTimeout(function() {
+              updateActive();
+              closeMobileMenu();
+            }, 50);
+          });
+        });
+
+        window.addEventListener('hashchange', updateActive);
+        updateActive();
+      });
+    </script>
+  {% endif %}
+</nav>
+

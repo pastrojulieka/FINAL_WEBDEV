@@ -1,0 +1,210 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}About Us{% endblock %}
+
+{% block stylesheets %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .font-montserrat { font-family: 'Montserrat', sans-serif; }
+    .font-lato { font-family: 'Lato', sans-serif; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+<body class="bg-gradient-to-br from-orange-50 via-white to-orange-100 min-h-screen font-lato">
+  
+  {% include 'public/_navigation.html.twig' %}
+
+  <!-- HERO SECTION -->
+  <section class="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-20 fade-in">
+    <div class="max-w-7xl mx-auto px-6 text-center">
+      <h1 class="text-5xl md:text-6xl font-bold mb-6 font-montserrat">About Us</h1>
+      <p class="text-xl md:text-2xl font-lato opacity-95 max-w-3xl mx-auto">
+        Learn more about JULIEKA and our commitment to delivering quality products and exceptional service.
+      </p>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <main class="max-w-7xl mx-auto px-6 py-16">
+    
+    <!-- Our Story -->
+    <section class="mb-16 fade-in" style="animation-delay: 0.1s;">
+      <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12 border-2 border-orange-100">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6 font-montserrat">
+          <i class="fa-solid fa-book-open text-orange-600 mr-2"></i>
+          Our Story
+        </h2>
+        <div class="prose prose-lg max-w-none font-lato text-gray-700">
+          <p class="text-lg mb-4">
+            JULIEKA was founded with a simple mission: to provide high-quality products that meet the needs of our customers while maintaining the highest standards of excellence.
+          </p>
+          <p class="text-lg mb-4">
+            Over the years, we have built a reputation for reliability, quality, and customer satisfaction. Our team is dedicated to sourcing the best products and ensuring that every customer has a positive experience when shopping with us.
+          </p>
+          <p class="text-lg">
+            We believe in building lasting relationships with our customers through transparent communication, quality products, and exceptional service.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Our Values -->
+    <section class="mb-16 fade-in" style="animation-delay: 0.2s;">
+      <h2 class="text-3xl font-bold text-center text-gray-800 mb-12 font-montserrat">
+        Our Core Values
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-xl shadow-lg p-6 text-center border-2 border-orange-100 hover:border-orange-300 transition">
+          <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-gem text-white text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2 font-montserrat">Quality</h3>
+          <p class="text-gray-600 font-lato text-sm">We never compromise on quality. Every product is carefully selected and tested.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-lg p-6 text-center border-2 border-orange-100 hover:border-orange-300 transition">
+          <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-heart text-white text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2 font-montserrat">Integrity</h3>
+          <p class="text-gray-600 font-lato text-sm">We conduct business with honesty, transparency, and ethical practices.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-lg p-6 text-center border-2 border-orange-100 hover:border-orange-300 transition">
+          <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-users text-white text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2 font-montserrat">Customer Focus</h3>
+          <p class="text-gray-600 font-lato text-sm">Our customers are at the heart of everything we do. Your satisfaction is our priority.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-lg p-6 text-center border-2 border-orange-100 hover:border-orange-300 transition">
+          <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-lightbulb text-white text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2 font-montserrat">Innovation</h3>
+          <p class="text-gray-600 font-lato text-sm">We continuously improve and innovate to better serve our customers.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Meet the Team -->
+    <section class="mb-16 fade-in" style="animation-delay: 0.3s;">
+      <div class="bg-white rounded-2xl shadow-lg p-8 md:p-12 border-2 border-orange-100">
+        <h2 class="text-3xl font-bold text-gray-800 mb-3 font-montserrat">
+          <i class="fa-solid fa-users text-orange-600 mr-2"></i>
+          Meet the Team
+        </h2>
+        <p class="text-lg text-gray-700 mb-10 font-lato max-w-3xl">
+          A reliable group focused on quality products, responsive service, and consistent operations.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {# Card 1 #}
+          <div class="bg-white rounded-xl shadow-lg border-2 border-orange-100 p-6 hover:border-orange-300 transition">
+            <div class="mb-4 h-60 w-60 mx-auto overflow-hidden rounded-full border-2 border-orange-200 bg-slate-100">
+              <img src="{{ asset('img/Maria.jpg') }}" alt="Julieka Pastro" class="w-full h-full object-cover object-center">
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-1 font-montserrat">Julieka Pastro</h3>
+            <p class="text-orange-700 font-semibold font-lato">Founder & CEO</p>
+          </div>
+
+          {# Card 2 #}
+          <div class="bg-white rounded-xl shadow-lg border-2 border-orange-100 p-6 hover:border-orange-300 transition">
+            <div class="mb-4 h-60 w-60 mx-auto overflow-hidden rounded-full border-2 border-orange-200 bg-slate-100">
+              <img src="{{ asset('img/Mia.jpg') }}" alt="Maria Santos" class="w-full h-full object-cover object-center">
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-1 font-montserrat">Maria Santos</h3>
+            <p class="text-orange-700 font-semibold font-lato">Operations Manager</p>
+          </div>
+
+          {# Card 3 #}
+          <div class="bg-white rounded-xl shadow-lg border-2 border-orange-100 p-6 hover:border-orange-300 transition">
+            <div class="mb-4 h-60 w-60 mx-auto overflow-hidden rounded-full border-2 border-orange-200 bg-slate-100">
+              <img src="{{ asset('img/Daniel.jpg') }}" alt="Daniel Rivera" class="w-full h-full object-cover object-center">
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-1 font-montserrat">Daniel Rivera</h3>
+            <p class="text-orange-700 font-semibold font-lato">Sales Lead</p>
+          </div>
+
+          {# Card 4 #}
+          <div class="bg-white rounded-xl shadow-lg border-2 border-orange-100 p-6 hover:border-orange-300 transition">
+            <div class="mb-4 h-60 w-60 mx-auto overflow-hidden rounded-full border-2 border-orange-200 bg-slate-100">
+              <img src="{{ asset('img/Leah.jpg') }}" alt="Leah Chen" class="w-full h-full object-cover object-center">
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-1 font-montserrat">Leah Chen</h3>
+            <p class="text-orange-700 font-semibold font-lato">Customer Support Manager</p>
+          </div>
+
+          {# Card 5 #}
+          <div class="bg-white rounded-xl shadow-lg border-2 border-orange-100 p-6 hover:border-orange-300 transition">
+            <div class="mb-4 h-60 w-60 mx-auto overflow-hidden rounded-full border-2 border-orange-200 bg-slate-100">
+              <img src="{{ asset('img/Mike.jpg') }}" alt="Mike Johnson" class="w-full h-full object-cover object-center">
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-1 font-montserrat">Mike Johnson</h3>
+            <p class="text-orange-700 font-semibold font-lato">Inventory & Stock Specialist</p>
+          </div>
+
+          {# Card 6 #}
+          <div class="bg-white rounded-xl shadow-lg border-2 border-orange-100 p-6 hover:border-orange-300 transition">
+            <div class="mb-4 h-60 w-60 mx-auto overflow-hidden rounded-full border-2 border-orange-200 bg-slate-100">
+              <img src="{{ asset('img/Karen.jpg') }}" alt="Karen Taylor" class="w-full h-full object-cover object-center">
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-1 font-montserrat">Karen Taylor</h3>
+            <p class="text-orange-700 font-semibold font-lato">Quality Assurance Coordinator</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="text-center fade-in" style="animation-delay: 0.4s;">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl shadow-lg p-12 text-white">
+        <h2 class="text-3xl font-bold mb-4 font-montserrat">Ready to Get Started?</h2>
+        <p class="text-xl mb-8 font-lato opacity-95">Explore our products and discover what makes JULIEKA special.</p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="{{ path('app_user_dashboard') }}" class="px-8 py-4 bg-white text-orange-600 rounded-xl font-semibold hover:shadow-2xl transition font-lato text-lg">
+            <i class="fa-solid fa-box mr-2"></i>
+            Browse Products
+          </a>
+          <a href="{{ path('app_contact') }}" class="px-8 py-4 bg-orange-700 text-white rounded-xl font-semibold hover:bg-orange-800 transition font-lato text-lg">
+            <i class="fa-solid fa-envelope mr-2"></i>
+            Contact Us
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t-2 border-orange-100 mt-16">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+      <div class="text-center">
+        <p class="text-gray-600 font-lato mb-2">
+          © 2025 <span class="text-orange-600 font-bold font-montserrat">JULIEKA</span>. All rights reserved.
+        </p>
+        {% if app.user %}
+          <p class="text-sm text-gray-500 font-lato">
+            Logged in as: <strong class="text-orange-600">{{ app.user.email }}</strong>
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </footer>
+
+</body>
+{% endblock %}
+

@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New User{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Lato:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #fed7aa;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<body class="antialiased bg-gradient-to-br from-orange-50 via-gray-50 to-orange-200 text-gray-800 min-h-screen">
+
+    <div class="min-h-screen flex">
+        {% include 'includes/_sidebar.html.twig' %}
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 flex flex-col relative overflow-hidden">
+            <!-- Animated background glow -->
+            <div class="absolute inset-0 overflow-hidden z-0">
+                <div class="absolute w-72 h-72 bg-orange-300 opacity-20 rounded-full blur-3xl top-10 left-20 animate-pulse"></div>
+                <div class="absolute w-96 h-96 bg-orange-400 opacity-30 rounded-full blur-3xl bottom-0 right-10 animate-pulse"></div>
+            </div>
+
+            <!-- HEADER -->
+            <header class="flex items-center justify-between p-5 bg-white/80 backdrop-blur-md shadow-md border-b border-orange-100 sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <button id="mobileMenuBtn" class="md:hidden p-2 rounded-md hover:bg-gray-100">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 font-montserrat">New User</h1>
+                        <p class="text-sm text-gray-500 font-lato">Create a new user or staff account</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <a href="{{ path('app_admin_users') }}" class="inline-flex items-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Users
+                    </a>
+                </div>
+            </header>
+
+            <!-- MAIN CONTENT -->
+            <main class="p-6 md:p-10 flex-1 overflow-y-auto relative z-10">
+                <div class="max-w-2xl mx-auto">
+                    <!-- Flash Messages -->
+                    {% for message in app.flashes('error') %}
+                        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                            <i class="fa-solid fa-exclamation-circle mr-2"></i>{{ message }}
+                        </div>
+                    {% endfor %}
+
+                    <div class="bg-white rounded-xl shadow-lg p-8 border border-orange-100">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'space-y-6'}}) }}
+
+                            {% if form_errors(form) %}
+                                <div class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                                    {{ form_errors(form) }}
+                                </div>
+                            {% endif %}
+
+                            <div>
+                                {{ form_label(form.email, null, {'class': 'block text-sm font-semibold text-gray-700 mb-2'}) }}
+                                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.email) }}
+                            </div>
+
+                            <div>
+                                {{ form_label(form.role, null, {'class': 'block text-sm font-semibold text-gray-700 mb-2'}) }}
+                                {{ form_widget(form.role, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.role) }}
+                            </div>
+
+                            <div>
+                                {{ form_label(form.plainPassword, null, {'class': 'block text-sm font-semibold text-gray-700 mb-2'}) }}
+                                {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.plainPassword) }}
+                            </div>
+
+                            <div class="flex gap-4 pt-4">
+                                <button type="submit" 
+                                        class="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+                                    <i class="fa-solid fa-user-plus mr-2"></i> Create User
+                                </button>
+                                <a href="{{ path('app_admin_users') }}" 
+                                   class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition">
+                                    Cancel
+                                </a>
+                            </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <footer class="mt-10 text-sm text-gray-500 text-center relative z-10">
+                    © 2025 <span class="text-orange-500 font-semibold">JULIEKA Admin</span> — All Rights Reserved.
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.querySelector('aside');
+        mobileBtn?.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+        });
+    </script>
+</body>
+{% endblock %}
+
+

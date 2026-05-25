@@ -1,0 +1,18 @@
+{{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+  {{ form_row(form.product, {
+    label: 'Product',
+    attr: {'class': 'w-full border-2 border-orange-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400'}
+  }) }}
+  {{ form_row(form.quantity, {
+    label: 'Quantity',
+    attr: {'min': 0, 'class': 'w-full border-2 border-orange-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400'}
+  }) }}
+  {{ form_row(form.status, {
+    label: 'Status',
+    attr: {'class': 'w-full border-2 border-orange-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400'}
+  }) }}
+  <button class="mt-2 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:scale-105 transition shadow-md">
+    <i class="fa-solid fa-floppy-disk"></i> {{ button_label|default('Save') }}
+  </button>
+{{ form_end(form) }}
+

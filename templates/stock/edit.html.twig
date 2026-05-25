@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Stock{% endblock %}
+
+{% block stylesheets %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Lato:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Lato', sans-serif; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; }
+  </style>
+{% endblock %}
+
+{% block body %}
+<body class="antialiased bg-gradient-to-br from-orange-50 via-gray-50 to-orange-200 text-gray-800 min-h-screen">
+  <div class="min-h-screen flex">
+    <!-- SIDEBAR -->
+    <aside class="hidden md:flex flex-col w-80 bg-white shadow-lg border-r border-gray-200 p-5">
+      <div class="flex items-center justify-center mb-8">
+        <img src="{{ asset('img/PL.png') }}" alt="Logo" class="w-45">
+      </div>
+      <nav class="flex-1 space-y-2">
+        <a href="{{ path('app_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        {% elseif is_granted('ROLE_STAFF') %}
+        <a href="{{ path('app_staff_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        {% endif %}
+        <a href="{{ path('app_product_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-box"></i> Products
+        </a>
+        <a href="{{ path('app_order_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-receipt"></i> Orders
+        </a>
+        <a href="{{ path('app_stock_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md">
+          <i class="fa-solid fa-warehouse"></i> Stock
+        </a>
+        <a href="{{ path('app_customer_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-users"></i> Customers
+        </a>
+        {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_admin_users') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-user-shield"></i> User Management
+        </a>
+        <a href="{{ path('app_admin_records') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-database"></i> All Records
+        </a>
+        <a href="{{ path('app_admin_activity_logs') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-clipboard-list"></i> Activity Logs
+        </a>
+        <a href="{{ path('app_settings') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-gear"></i> Settings
+        </a>
+        {% endif %}
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col relative overflow-hidden">
+      <div class="absolute inset-0 overflow-hidden z-0">
+        <div class="absolute w-72 h-72 bg-orange-300 opacity-20 rounded-full blur-3xl top-10 left-20 animate-pulse"></div>
+        <div class="absolute w-96 h-96 bg-orange-400 opacity-30 rounded-full blur-3xl bottom-0 right-10 animate-pulse"></div>
+      </div>
+
+      <header class="flex items-center justify-between p-5 bg-white/80 backdrop-blur-md shadow-md border-b border-orange-100 sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+          <button id="mobileMenuBtn" class="md:hidden p-2 rounded-md hover:bg-gray-100">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <p class="text-sm text-gray-500">Update stock entry</p>
+            <h1 class="text-2xl font-bold text-gray-800">Edit Stock</h1>
+          </div>
+        </div>
+        <a href="{{ path('app_stock_index') }}" class="text-orange-600 hover:text-orange-700 flex items-center gap-2 text-sm font-semibold">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
+      </header>
+
+      <main class="p-6 md:p-10 flex-1 overflow-y-auto relative z-10">
+        <div class="max-w-4xl mx-auto bg-white/90 backdrop-blur border border-orange-100 shadow-xl rounded-2xl p-8">
+          {% include 'stock/_form.html.twig' with {'button_label': 'Update'} %}
+
+          <form method="post" action="{{ path('app_stock_delete', {'id': stock.id}) }}" onsubmit="return confirm('Are you sure?');" class="mt-6">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ stock.id) }}">
+            <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition shadow-md">
+              <i class="fa-solid fa-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.querySelector('aside');
+    mobileBtn?.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+    });
+  </script>
+</body>
+{% endblock %}
+

@@ -1,0 +1,509 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Order List{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Lato:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Lato', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Montserrat', sans-serif;
+    }
+    
+    .order-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        border: 2px solid transparent;
+    }
+    
+    .order-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(230, 126, 34, 0.2);
+        border-color: #fb923c;
+    }
+    
+    .order-card-header {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        padding: 16px 20px;
+        color: white;
+    }
+    
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .badge-info {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        backdrop-filter: blur(10px);
+    }
+    
+    .info-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #ffedd5;
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .search-box {
+        position: relative;
+        margin-bottom: 24px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 14px 20px 14px 48px;
+        border: 2px solid #fed7aa;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #f97316;
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #fb923c;
+    }
+    
+    .filter-chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+    
+    .chip {
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 2px solid #fed7aa;
+        background: white;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #9a3412;
+    }
+    
+    .chip:hover, .chip.active {
+        border-color: #f97316;
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #fb923c;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 16px;
+        opacity: 0.3;
+        color: #fdba74;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<body class="antialiased bg-gradient-to-br from-orange-50 via-gray-50 to-orange-200 text-gray-800 min-h-screen">
+
+  <div class="min-h-screen flex">
+
+    <!-- SIDEBAR -->
+    <aside class="hidden md:flex flex-col w-80 bg-white shadow-lg border-r border-gray-200 p-5">
+      <div class="flex items-center justify-center mb-8">
+        <img src="{{ asset('img/PL.png') }}" alt="Logo" class="w-45">
+      </div>
+
+      <nav class="flex-1 space-y-2">
+        {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        {% elseif is_granted('ROLE_STAFF') %}
+        <a href="{{ path('app_staff_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        {% endif %}
+        <a href="{{ path('app_product_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-box"></i> Products
+        </a>
+        <a href="{{ path('app_order_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md">
+          <i class="fa-solid fa-receipt"></i> Orders
+        </a>
+        <a href="{{ path('app_stock_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-warehouse"></i> Stock
+        </a>
+        <a href="{{ path('app_customer_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-users"></i> Customers
+        </a>
+        {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_admin_users') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-user-shield"></i> User Management
+        </a>
+        <a href="{{ path('app_admin_records') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-database"></i> All Records
+        </a>
+        <a href="{{ path('app_admin_activity_logs') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-clipboard-list"></i> Activity Logs
+        </a>
+        <a href="{{ path('app_settings') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-gear"></i> Settings
+        </a>
+        {% endif %}
+      </nav>
+
+      <div class="mt-6">
+        <p class="text-xs uppercase text-gray-400 mb-2 font-montserrat tracking-wide">Quick actions</p>
+        <a href="{{ path('app_logout') }}" class="w-full py-2 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition transform hover:scale-105 block text-center"
+                style="background: linear-gradient(135deg, #ff7a1f, #ff6600);">
+          <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col relative overflow-hidden">
+
+      <!-- Animated background glow -->
+      <div class="absolute inset-0 overflow-hidden z-0">
+        <div class="absolute w-72 h-72 bg-orange-300 opacity-20 rounded-full blur-3xl top-10 left-20 animate-pulse"></div>
+        <div class="absolute w-96 h-96 bg-orange-400 opacity-30 rounded-full blur-3xl bottom-0 right-10 animate-pulse"></div>
+      </div>
+
+      <!-- HEADER -->
+      <header class="flex items-center justify-between p-5 bg-white/80 backdrop-blur-md shadow-md border-b border-orange-100 sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+          <button id="mobileMenuBtn" class="md:hidden p-2 rounded-md hover:bg-gray-100">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800 font-montserrat">Orders</h1>
+            <p class="text-sm text-gray-500 font-lato">Manage and track all customer orders</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <button class="px-3 py-2 rounded-full bg-white border border-gray-200 hover:bg-orange-50 transition relative shadow-sm">
+            <i class="fa-solid fa-bell text-orange-500"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping"></span>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"></span>
+          </button>
+
+          <div class="flex items-center gap-3">
+            <img src="{{ asset('img/Bed.png') }}" alt="avatar" class="w-10 h-10 rounded-full border-2 border-orange-400 object-cover shadow-md" />
+            <div class="hidden sm:block text-sm">
+              <div class="font-semibold text-gray-800 font-lato">{{ app.user.email }}</div>
+              <div class="text-xs text-gray-500 font-lato">
+                {% if is_granted('ROLE_ADMIN') %}
+                  Admin
+                {% elseif is_granted('ROLE_STAFF') %}
+                  Staff
+                {% else %}
+                  User
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main class="p-6 md:p-10 flex-1 overflow-y-auto relative z-10">
+        <div class="max-w-7xl mx-auto">
+          
+          <!-- Header Section -->
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h2 class="text-3xl font-bold text-orange-600 tracking-tight mb-1">Order Management</h2>
+              <p class="text-gray-600"><span id="orderCount">{{ orders|length }}</span> orders in the system</p>
+            </div>
+            <a href="{{ path('app_order_new') }}"
+               class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+              <i class="fa-solid fa-plus"></i> Create New Order
+            </a>
+          </div>
+
+          <!-- Search Box -->
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" 
+                   id="searchInput" 
+                   class="search-input" 
+                   placeholder="Search by customer name, product, material, or color...">
+          </div>
+
+          <!-- Filter Chips -->
+          <div class="filter-chips">
+            <button class="chip active" data-filter="all">
+              <i class="fa-solid fa-border-all mr-1"></i> All Orders
+            </button>
+            <button class="chip" data-filter="today">
+              <i class="fa-solid fa-calendar-day mr-1"></i> Today
+            </button>
+            <button class="chip" data-filter="thisWeek">
+              <i class="fa-solid fa-calendar-week mr-1"></i> This Week
+            </button>
+            <button class="chip" data-filter="thisMonth">
+              <i class="fa-solid fa-calendar mr-1"></i> This Month
+            </button>
+          </div>
+
+          <!-- Order Cards Grid -->
+          <div id="orderGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {% for order in orders %}
+            <div class="order-card" 
+                 data-customer="{{ order.customerName|lower }}"
+                 data-product="{{ order.productName|lower }}"
+                 data-material="{{ order.material|lower }}"
+                 data-color="{{ order.color|lower }}"
+                 data-date="{{ order.date ? order.date|date('Y-m-d') : '' }}">
+              
+              <!-- Card Header -->
+              <div class="order-card-header">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <span class="text-xs opacity-80">Order #{{ order.id }}</span>
+                    <h3 class="text-lg font-bold mt-1">{{ order.customerName }}</h3>
+                  </div>
+                  <span class="badge badge-info">{{ order.date ? order.date|date('M d') : 'N/A' }}</span>
+                </div>
+                <p class="text-sm opacity-90">{{ order.productName }}</p>
+              </div>
+
+              <!-- Card Body -->
+              <div class="p-5">
+                
+                <!-- Product Details -->
+                <div class="info-row">
+                  <div class="info-icon" style="background: #ffedd5;">
+                    <i class="fa-solid fa-palette text-orange-600"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Material & Color</p>
+                    <p class="font-semibold text-gray-800">{{ order.material }} • {{ order.color }}</p>
+                  </div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="info-row">
+                  <div class="info-icon" style="background: #fed7aa;">
+                    <i class="fa-solid fa-boxes-stacked text-orange-700"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Quantity</p>
+                    <p class="font-semibold text-gray-800">{{ order.quantity }} units</p>
+                  </div>
+                </div>
+
+                <!-- Pricing -->
+                <div class="info-row">
+                  <div class="info-icon" style="background: #fb923c;">
+                    <i class="fa-solid fa-peso-sign text-white"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Total Amount</p>
+                    <p class="font-bold text-xl text-orange-600">₱{{ order.totalAmount }}</p>
+                  </div>
+                </div>
+
+                <!-- Delivery Date -->
+                <div class="info-row">
+                  <div class="info-icon" style="background: #fdba74;">
+                    <i class="fa-solid fa-truck text-orange-800"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Delivery Date</p>
+                    <p class="font-semibold text-gray-800">{{ order.deliveryDate ? order.deliveryDate|date('M d, Y') : 'Not set' }}</p>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-2 mt-6 pt-4 border-t border-orange-100">
+                  <a href="{{ path('app_order_show', {'id': order.id}) }}" 
+                     class="flex-1 text-center px-4 py-2.5 bg-white border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition-all duration-200 text-sm">
+                    <i class="fa-solid fa-eye mr-1"></i> View
+                  </a>
+                  <a href="{{ path('app_order_edit', {'id': order.id}) }}" 
+                     class="flex-1 text-center px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-200 text-sm">
+                    <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                  </a>
+                </div>
+
+              </div>
+            </div>
+            {% else %}
+            <div class="col-span-full">
+              <div class="empty-state">
+                <i class="fa-solid fa-inbox"></i>
+                <h3 class="text-xl font-bold text-orange-600 mb-2">No Orders Found</h3>
+                <p class="text-orange-500">Start by creating your first order</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Empty State (hidden by default, shown when search has no results) -->
+          <div id="emptyState" class="hidden">
+            <div class="empty-state">
+              <i class="fa-solid fa-search"></i>
+              <h3 class="text-xl font-bold text-orange-600 mb-2">No Orders Found</h3>
+              <p class="text-orange-500">Try adjusting your search or filters</p>
+            </div>
+          </div>
+
+        </div>
+
+        <footer class="mt-10 text-sm text-gray-500 text-center relative z-10">
+          © 2025 <span class="text-orange-500 font-semibold">JULIEKA Admin</span> — All Rights Reserved.
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Mobile menu toggle
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.querySelector('aside');
+    mobileBtn?.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const orderGrid = document.getElementById('orderGrid');
+    const orderCards = orderGrid.querySelectorAll('.order-card');
+    const emptyState = document.getElementById('emptyState');
+    const orderCount = document.getElementById('orderCount');
+
+    function updateOrderCount() {
+      const visibleCards = Array.from(orderCards).filter(card => !card.classList.contains('hidden'));
+      orderCount.textContent = visibleCards.length;
+      
+      if (visibleCards.length === 0) {
+        orderGrid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+      } else {
+        orderGrid.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+      }
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      
+      orderCards.forEach(card => {
+        const customer = card.dataset.customer;
+        const product = card.dataset.product;
+        const material = card.dataset.material;
+        const color = card.dataset.color;
+        
+        const matches = customer.includes(searchTerm) || 
+                       product.includes(searchTerm) || 
+                       material.includes(searchTerm) || 
+                       color.includes(searchTerm);
+        
+        if (matches) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+      
+      updateOrderCount();
+    });
+
+    // Filter functionality
+    const filterChips = document.querySelectorAll('.chip');
+    
+    filterChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        // Update active state
+        filterChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        
+        const filter = chip.dataset.filter;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        orderCards.forEach(card => {
+          const orderDate = new Date(card.dataset.date);
+          orderDate.setHours(0, 0, 0, 0);
+          
+          let show = false;
+          
+          if (filter === 'all') {
+            show = true;
+          } else if (filter === 'today') {
+            show = orderDate.getTime() === today.getTime();
+          } else if (filter === 'thisWeek') {
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            show = orderDate >= weekAgo && orderDate <= today;
+          } else if (filter === 'thisMonth') {
+            show = orderDate.getMonth() === today.getMonth() && 
+                   orderDate.getFullYear() === today.getFullYear();
+          }
+          
+          if (show) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+        
+        // Clear search when changing filters
+        searchInput.value = '';
+        updateOrderCount();
+      });
+    });
+  </script>
+</body>
+{% endblock %}

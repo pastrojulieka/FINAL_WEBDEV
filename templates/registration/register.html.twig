@@ -1,0 +1,258 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block stylesheets %}
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: #f5e6e0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .main-container {
+        display: flex;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        max-width: 900px;
+        width: 100%;
+        margin: 20px;
+    }
+
+    .logo-container {
+        background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+        padding: 60px 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 400px;
+        text-align: center;
+    }
+
+    .logo-container img {
+        max-width: 280px;
+        margin-bottom: 30px;
+    }
+
+    .welcome-text {
+        color: white;
+        font-size: 18px;
+        font-weight: 400;
+    }
+
+    .register-container {
+        padding: 60px 50px;
+        flex: 1;
+    }
+
+    h1 {
+        color: #2c3e50;
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+    }
+
+    .subtitle {
+        color: #7f8c8d;
+        font-size: 15px;
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        color: #2c3e50;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 15px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #ff6b35;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: #bdc3c7;
+    }
+
+    .form-error {
+        color: #e74c3c;
+        font-size: 13px;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .alert-error {
+        background: #fee;
+        border: 1px solid #fcc;
+        color: #c33;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin: 20px 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-right: 10px;
+        cursor: pointer;
+        accent-color: #ff6b35;
+    }
+
+    .checkbox-group label {
+        color: #7f8c8d;
+        font-size: 14px;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .checkbox-group a {
+        color: #ff6b35;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .checkbox-group a:hover {
+        text-decoration: underline;
+    }
+
+    .btn-register {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-register:active {
+        transform: translateY(0);
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 20px;
+        color: #7f8c8d;
+        font-size: 14px;
+    }
+
+    .login-link a {
+        color: #ff6b35;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Override Symfony form default styles */
+    form > div {
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            flex-direction: column;
+        }
+
+        .logo-container {
+            min-width: 100%;
+            padding: 40px 20px;
+        }
+
+        .register-container {
+            padding: 40px 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="main-container">
+    <div class="logo-container">
+        <img src="{{ asset('img/SD logo.png') }}" alt="SD Logo">
+        <p class="welcome-text">Join us today! Create your account.</p>
+    </div>
+
+    <div class="register-container">
+        <h1>Register</h1>
+        <p class="subtitle">Please fill in this form to create an account!</p>
+
+        {% if form_errors(registrationForm) %}
+            <div class="alert-error">
+                {{ form_errors(registrationForm) }}
+            </div>
+        {% endif %}
+
+        {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="form-group">
+                {{ form_label(registrationForm.email) }}
+                {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Enter your email'}}) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(registrationForm.plainPassword, 'Password') }}
+                {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control', 'placeholder': 'Enter your password'}}) }}
+                {{ form_errors(registrationForm.plainPassword) }}
+            </div>
+
+            <div class="checkbox-group">
+                {{ form_widget(registrationForm.agreeTerms) }}
+                {{ form_label(registrationForm.agreeTerms) }}
+            </div>
+
+            <button type="submit" class="btn-register">Register</button>
+            
+        {{ form_end(registrationForm) }}
+
+        <div class="login-link">
+            Already have an account? <a href="{{ path('app_login') }}">Login here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

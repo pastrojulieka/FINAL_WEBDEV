@@ -1,0 +1,312 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Lato:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    .font-montserrat { font-family: 'Montserrat', sans-serif; }
+    .font-lato { font-family: 'Lato', sans-serif; }
+  </style>
+{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-gradient-to-br from-orange-50 via-gray-50 to-orange-200 py-8 px-4">
+  
+  
+  <div class="max-w-5xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold text-gray-800 font-montserrat mb-2">
+        <i class="fa-solid fa-shopping-cart text-orange-600 mr-3"></i>Shopping Cart
+      </h1>
+      <p class="text-gray-600 font-lato">Review and manage your items</p>
+    </div>
+
+    {% if items|length > 0 %}
+      <!-- Cart Items -->
+      <div class="bg-white rounded-2xl shadow-lg border-2 border-orange-100 p-6 mb-6">
+        <div class="space-y-4">
+          {% for item in items %}
+            <div class="flex gap-4 items-start p-4 bg-gray-50 rounded-lg border border-orange-100" data-product-id="{{ item.product ? item.product.id : item.id }}">
+              
+              <!-- Product Image -->
+              <div class="w-24 h-24 rounded-lg bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {% if item.product.image %}
+                  <img src="{{ asset('img/' ~ item.product.image) }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+                {% else %}
+                  <i class="fa-solid fa-box text-orange-300 text-3xl"></i>
+                {% endif %}
+              </div>
+
+              <!-- Product Info -->
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-semibold text-gray-800 font-montserrat truncate">
+                  {{ item.product ? item.product.name : 'Unknown Product' }}
+                </h3>
+                <p class="text-sm text-gray-600 font-lato mb-2">
+                  {{ (item.product and item.product.description) ? (item.product.description|slice(0, 80) ~ '...') : '' }}
+                </p>
+                <div class="flex items-center gap-2 text-sm text-gray-700">
+                  <i class="fa-solid fa-peso-sign text-orange-600"></i>
+                  <span class="font-semibold item-subtotal">₱{{ item.product ? (item.product.price * item.quantity)|number_format(2, '.', ',') : 'N/A' }}</span>
+                  <span class="text-gray-500 mx-2">×</span>
+                  <span class="text-gray-600"><span class="item-qty">{{ item.quantity }}</span> item(s)</span>
+                </div>
+              </div>
+
+              <!-- Quantity & Actions -->
+              <div class="flex flex-col gap-3 items-end">
+                <div class="flex items-center gap-2">
+                  <button class="qty-dec px-3 py-1 bg-orange-100 text-orange-600 rounded hover:bg-orange-200 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Decrease quantity">
+                    <i class="fa-solid fa-minus text-sm"></i>
+                  </button>
+                  <input type="number" class="qty-input w-12 text-center border-2 border-orange-200 rounded py-1 font-semibold" 
+                         value="{{ item.quantity }}" min="1" max="999" readonly>
+                  <button class="qty-inc px-3 py-1 bg-orange-100 text-orange-600 rounded hover:bg-orange-200 transition" title="Increase quantity">
+                    <i class="fa-solid fa-plus text-sm"></i>
+                  </button>
+                </div>
+                <button class="remove-btn px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition font-semibold text-sm">
+                  <i class="fa-solid fa-trash-alt mr-1"></i>Remove
+                </button>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Totals & Checkout -->
+      <div class="bg-white rounded-2xl shadow-lg border-2 border-orange-100 p-6">
+        {# compute subtotal in Twig to avoid complex inline expressions #}
+        {% set subtotal = 0 %}
+        {% for i in items %}
+          {% if i.product %}
+            {% set subtotal = subtotal + (i.product.price * i.quantity) %}
+          {% endif %}
+        {% endfor %}
+        <div class="mb-6 pb-6 border-b-2 border-orange-100">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-gray-600 font-lato">Subtotal:</span>
+            <span class="text-xl font-semibold text-gray-800" id="subtotalAmount">₱{{ subtotal|number_format(2, '.', ',') }}</span>
+          </div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-gray-600 font-lato">Shipping:</span>
+            <span class="text-lg text-gray-700">FREE</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600 font-lato">Total Items:</span>
+            <span class="text-lg font-semibold text-orange-600" id="totalItems">{{ totalItems }}</span>
+          </div>
+        </div>
+
+        <div class="flex gap-3 flex-col sm:flex-row">
+          <a href="{{ path('app_user_dashboard') }}" class="flex-1 px-6 py-3 bg-white border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition text-center">
+            <i class="fa-solid fa-arrow-left mr-2"></i>Continue Shopping
+          </a>
+          <button class="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+            <i class="fa-solid fa-credit-card mr-2"></i>Proceed to Checkout
+          </button>
+        </div>
+      </div>
+    {% else %}
+      <!-- Empty Cart -->
+      <div class="bg-white rounded-2xl shadow-lg border-2 border-orange-100 p-16 text-center">
+        <i class="fa-solid fa-cart-shopping text-8xl text-orange-200 mb-6"></i>
+        <h2 class="text-3xl font-bold text-gray-700 mb-3 font-montserrat">Your Cart is Empty</h2>
+        <p class="text-gray-500 mb-8 font-lato text-lg">Add some products to get started!</p>
+        <a href="{{ path('app_user_dashboard') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transition">
+          <i class="fa-solid fa-store"></i>Browse Products
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  // Store product prices for calculation
+  const productPrices = {};
+  {% for item in items %}
+    {% if item.product %}
+      productPrices[{{ item.product.id }}] = {{ item.product.price }};
+    {% endif %}
+  {% endfor %}
+
+  // Update subtotal calculation
+  function updateSubtotal() {
+    let subtotal = 0;
+    document.querySelectorAll('[data-product-id]').forEach(item => {
+      const pid = parseInt(item.dataset.productId);
+      const qty = parseInt(item.querySelector('.qty-input').value);
+      if (productPrices[pid]) {
+        subtotal += productPrices[pid] * qty;
+      }
+    });
+    document.getElementById('subtotalAmount').textContent = '₱' + subtotal.toLocaleString('en-PH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  // Update item subtotal
+  function updateItemSubtotal(item) {
+    const pid = parseInt(item.dataset.productId);
+    const qty = parseInt(item.querySelector('.qty-input').value);
+    const subtotalEl = item.querySelector('.item-subtotal');
+    const qtyDisplayEl = item.querySelector('.item-qty');
+    
+    if (productPrices[pid]) {
+      const itemTotal = productPrices[pid] * qty;
+      subtotalEl.textContent = '₱' + itemTotal.toLocaleString('en-PH', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      qtyDisplayEl.textContent = qty;
+    }
+  }
+
+  // Refresh cart count badge
+  async function refreshCartBadge() {
+    try {
+      const res = await fetch('{{ path('app_cart_count') }}');
+      const data = await res.json();
+      if (data.success && data.totalItems !== undefined) {
+        const cartBadge = document.querySelector('#cartBadge');
+        if (cartBadge) {
+          cartBadge.textContent = data.totalItems;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch cart count:', e);
+    }
+  }
+
+  // Update quantity on server
+  async function updateQuantity(pid, newQty, item) {
+    try {
+      const res = await fetch('{{ path('app_cart_update') }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ id: pid, qty: newQty })
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        document.getElementById('totalItems').textContent = data.totalItems;
+        updateItemSubtotal(item);
+        updateSubtotal();
+        await refreshCartBadge();
+      } else {
+        alert('Failed to update quantity: ' + (data.message || 'Unknown error'));
+      }
+    } catch (e) {
+      console.error('Error updating quantity:', e);
+      alert('Failed to update quantity. Please try again.');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Refresh cart badge on load
+    refreshCartBadge();
+
+    // Handle cart items
+    document.querySelectorAll('[data-product-id]').forEach(item => {
+      const pid = item.dataset.productId;
+      const qtyInput = item.querySelector('.qty-input');
+      const incBtn = item.querySelector('.qty-inc');
+      const decBtn = item.querySelector('.qty-dec');
+      const removeBtn = item.querySelector('.remove-btn');
+
+      // Update decrease button state
+      const updateDecButtonState = () => {
+        const currentQty = parseInt(qtyInput.value);
+        decBtn.disabled = currentQty <= 1;
+      };
+
+      // Increase quantity
+      incBtn?.addEventListener('click', async () => {
+        const currentQty = parseInt(qtyInput.value);
+        const newQty = Math.min(999, currentQty + 1);
+        qtyInput.value = newQty;
+        updateDecButtonState();
+        await updateQuantity(pid, newQty, item);
+      });
+
+      // Decrease quantity
+      decBtn?.addEventListener('click', async () => {
+        const currentQty = parseInt(qtyInput.value);
+        if (currentQty > 1) {
+          const newQty = currentQty - 1;
+          qtyInput.value = newQty;
+          updateDecButtonState();
+          await updateQuantity(pid, newQty, item);
+        }
+      });
+
+      // Manual input change (blur event)
+      qtyInput?.addEventListener('blur', async () => {
+        let newQty = parseInt(qtyInput.value) || 1;
+        newQty = Math.max(1, Math.min(999, newQty));
+        qtyInput.value = newQty;
+        updateDecButtonState();
+        await updateQuantity(pid, newQty, item);
+      });
+
+      // Remove item
+      removeBtn?.addEventListener('click', async () => {
+        if (!confirm('Are you sure you want to remove this item from your cart?')) {
+          return;
+        }
+        
+        try {
+          const res = await fetch('{{ path('app_cart_remove') }}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ id: pid })
+          });
+          
+          const data = await res.json();
+          
+          if (data.success) {
+            // Remove item with animation
+            item.style.transition = 'opacity 0.3s, transform 0.3s';
+            item.style.opacity = '0';
+            item.style.transform = 'translateX(-20px)';
+            
+            setTimeout(() => {
+              item.remove();
+              document.getElementById('totalItems').textContent = data.totalItems;
+              updateSubtotal();
+              
+              // Reload page if cart is empty
+              if (data.totalItems === 0) {
+                location.reload();
+              }
+            }, 300);
+            
+            await refreshCartBadge();
+          } else {
+            alert('Failed to remove item: ' + (data.message || 'Unknown error'));
+          }
+        } catch (e) {
+          console.error('Error removing item:', e);
+          alert('Failed to remove item. Please try again.');
+        }
+      });
+
+      // Initialize button state
+      updateDecButtonState();
+    });
+  });
+</script>
+{% endblock %}

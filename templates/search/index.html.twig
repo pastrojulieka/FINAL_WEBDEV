@@ -1,0 +1,304 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block stylesheets %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .font-montserrat { font-family: 'Montserrat', sans-serif; }
+    .font-lato { font-family: 'Lato', sans-serif; }
+  </style>
+{% endblock %}
+
+{% block body %}
+<body class="antialiased bg-gradient-to-br from-orange-50 via-gray-50 to-orange-100 text-gray-800 min-h-screen font-lato">
+  <div class="min-h-screen flex">
+    
+    <!-- SIDEBAR -->
+    <aside class="hidden md:flex flex-col w-80 bg-white shadow-lg border-r border-gray-200 p-5">
+      <div class="flex items-center justify-center mb-8">
+        <img src="{{ asset('img/PL.png') }}" alt="Logo" class="w-45">
+      </div>
+
+      <nav class="flex-1 space-y-2">
+        {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        {% elseif is_granted('ROLE_STAFF') %}
+        <a href="{{ path('app_staff_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        {% endif %}
+        <a href="{{ path('app_product_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-box"></i> Products
+        </a>
+        <a href="{{ path('app_order_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-receipt"></i> Orders
+        </a>
+        <a href="{{ path('app_stock_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-warehouse"></i> Stock
+        </a>
+        <a href="{{ path('app_customer_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-users"></i> Customers
+        </a>
+        {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_settings') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-gear"></i> Settings
+        </a>
+        {% endif %}
+      </nav>
+
+      <div class="mt-6">
+        <p class="text-xs uppercase text-gray-400 mb-2 font-montserrat tracking-wide">Quick actions</p>
+        <a href="{{ path('app_logout') }}" class="w-full py-2 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition transform hover:scale-105 block text-center"
+                style="background: linear-gradient(135deg, #ff7a1f, #ff6600);">
+          <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col">
+      
+      <!-- HEADER -->
+      <header class="flex items-center justify-between p-5 bg-white/80 backdrop-blur-md shadow-md border-b border-orange-100 sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+          <button id="mobileMenuBtn" class="md:hidden p-2 rounded-md hover:bg-gray-100">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800 font-montserrat">Search Results</h1>
+            <p class="text-sm text-gray-500 font-lato">
+              {% if query %}
+                Results for "{{ query }}"
+              {% else %}
+                Enter a search query
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="relative hidden lg:block">
+            <form action="{{ path('app_search') }}" method="GET">
+              <input type="text" name="q" value="{{ query }}" placeholder="Search anything..."
+                     class="w-72 pl-4 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 focus:outline-none transition font-lato shadow-sm" />
+              <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-600 transition">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </button>
+            </form>
+          </div>
+
+          <button class="px-3 py-2 rounded-full bg-white border border-gray-200 hover:bg-orange-50 transition relative shadow-sm">
+            <i class="fa-solid fa-bell text-orange-500"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping"></span>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"></span>
+          </button>
+
+          <div class="flex items-center gap-3">
+            <img src="{{ asset('img/Julieka.jpg') }}" alt="avatar" class="w-10 h-10 rounded-full border-2 border-orange-400 object-cover shadow-md" />
+            <div class="hidden sm:block text-sm">
+              <div class="font-semibold text-gray-800 font-lato">Julieka Pastro</div>
+              <div class="text-xs text-gray-500 font-lato">Admin</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT -->
+      <main class="p-6 flex-1 overflow-y-auto">
+        
+        {% if query %}
+          <!-- SUMMARY -->
+          <div class="mb-6 bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-orange-100">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                  <i class="fa-solid fa-magnifying-glass text-white"></i>
+                </div>
+                <div>
+                  <h2 class="font-semibold text-gray-800 font-lato">
+                    Found {{ products|length + orders|length + customers|length }} results
+                  </h2>
+                  <p class="text-sm text-gray-600 font-lato">
+                    {{ products|length }} products, {{ orders|length }} orders, {{ customers|length }} customers
+                  </p>
+                </div>
+              </div>
+              <a href="{{ path('app_dashboard') }}" class="text-orange-600 hover:text-orange-700 font-medium text-sm font-lato flex items-center gap-1">
+                <i class="fa-solid fa-arrow-left text-xs"></i> Back to Dashboard
+              </a>
+            </div>
+          </div>
+
+          <!-- PRODUCTS SECTION -->
+          {% if products|length > 0 %}
+            <section class="mb-8">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <i class="fa-solid fa-box text-orange-600"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800 font-montserrat">Products ({{ products|length }})</h2>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for product in products %}
+                  <a href="{{ path('app_product_show', {'id': product.id}) }}" class="bg-white/80 backdrop-blur-sm p-5 rounded-xl shadow-lg border border-orange-100 hover:shadow-xl transition-all duration-300 block">
+                    <div class="flex items-start gap-4">
+                      {% if product.image %}
+                        <img src="{{ asset('img/' ~ product.image) }}" alt="{{ product.name }}" class="w-20 h-20 object-cover rounded-lg border border-orange-200">
+                      {% else %}
+                        <div class="w-20 h-20 bg-orange-100 rounded-lg flex items-center justify-center">
+                          <i class="fa-solid fa-image text-orange-400 text-2xl"></i>
+                        </div>
+                      {% endif %}
+                      <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 font-lato mb-1">{{ product.name }}</h3>
+                        <p class="text-sm text-gray-600 font-lato mb-2 line-clamp-2">{{ product.description }}</p>
+                        <div class="flex items-center gap-2 text-xs text-gray-500 font-lato">
+                          <span class="bg-orange-100 px-2 py-1 rounded">{{ product.material }}</span>
+                          <span class="bg-orange-100 px-2 py-1 rounded">{{ product.color }}</span>
+                        </div>
+                        <p class="text-orange-600 font-bold font-montserrat mt-2">₱{{ product.price|number_format(2) }}</p>
+                      </div>
+                    </div>
+                  </a>
+                {% endfor %}
+              </div>
+            </section>
+          {% endif %}
+
+          <!-- ORDERS SECTION -->
+          {% if orders|length > 0 %}
+            <section class="mb-8">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <i class="fa-solid fa-receipt text-orange-600"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800 font-montserrat">Orders ({{ orders|length }})</h2>
+              </div>
+              
+              <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-orange-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                  <table class="w-full">
+                    <thead class="bg-orange-50">
+                      <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider font-lato">Order #</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider font-lato">Customer</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider font-lato">Product</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider font-lato">Material</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider font-lato">Date</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider font-lato">Total</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider font-lato">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                      {% for order in orders %}
+                        <tr class="hover:bg-orange-50 transition-colors">
+                          <td class="px-4 py-3 font-semibold text-gray-800 font-lato">#{{ order.id }}</td>
+                          <td class="px-4 py-3 text-gray-700 font-lato">{{ order.customerName }}</td>
+                          <td class="px-4 py-3 text-gray-700 font-lato">{{ order.productName }}</td>
+                          <td class="px-4 py-3 text-gray-700 font-lato">
+                            <span class="bg-orange-100 px-2 py-1 rounded text-xs">{{ order.material }}</span>
+                          </td>
+                          <td class="px-4 py-3 text-gray-600 text-sm font-lato">{{ order.date|date('M d, Y') }}</td>
+                          <td class="px-4 py-3 font-bold text-orange-600 font-montserrat">₱{{ order.totalAmount|number_format(2) }}</td>
+                          <td class="px-4 py-3">
+                            <a href="{{ path('app_order_show', {'id': order.id}) }}" class="text-orange-600 hover:text-orange-700 font-medium text-sm font-lato">
+                              View <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+          {% endif %}
+
+          <!-- CUSTOMERS SECTION -->
+          {% if customers|length > 0 %}
+            <section class="mb-8">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <i class="fa-solid fa-users text-orange-600"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800 font-montserrat">Customers ({{ customers|length }})</h2>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for customer in customers %}
+                  <a href="{{ path('app_customer_show', {'id': customer.id}) }}" class="bg-white/80 backdrop-blur-sm p-5 rounded-xl shadow-lg border border-orange-100 hover:shadow-xl transition-all duration-300 block">
+                    <div class="flex items-start gap-4">
+                      <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg font-montserrat flex-shrink-0">
+                        {{ customer.name|slice(0, 1)|upper }}
+                      </div>
+                      <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 font-lato mb-1">{{ customer.name }}</h3>
+                        <div class="space-y-1 text-sm text-gray-600 font-lato">
+                          <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-envelope text-orange-500 w-4"></i>
+                            <span>{{ customer.emailAddress }}</span>
+                          </div>
+                          <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-phone text-orange-500 w-4"></i>
+                            <span>{{ customer.phoneNumber }}</span>
+                          </div>
+                          <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-location-dot text-orange-500 w-4"></i>
+                            <span>{{ customer.address }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                {% endfor %}
+              </div>
+            </section>
+          {% endif %}
+
+          <!-- NO RESULTS -->
+          {% if products|length == 0 and orders|length == 0 and customers|length == 0 %}
+            <div class="text-center py-16">
+              <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-search text-orange-400 text-3xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800 font-montserrat mb-2">No results found</h3>
+              <p class="text-gray-600 font-lato mb-6">We couldn't find anything matching "{{ query }}"</p>
+              <a href="{{ path('app_dashboard') }}" class="inline-block px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-400 text-white rounded-lg font-medium hover:shadow-lg transition transform hover:scale-105 font-lato">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Back to Dashboard
+              </a>
+            </div>
+          {% endif %}
+
+        {% else %}
+          <!-- EMPTY STATE -->
+          <div class="text-center py-16">
+            <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-magnifying-glass text-orange-400 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 font-montserrat mb-2">Start searching</h3>
+            <p class="text-gray-600 font-lato mb-6">Enter a search query to find products, orders, or customers</p>
+          </div>
+        {% endif %}
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.querySelector('aside');
+    mobileBtn?.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+    });
+  </script>
+</body>
+{% endblock %}

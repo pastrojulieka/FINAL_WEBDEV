@@ -1,0 +1,326 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}All Data Records{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Lato:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<body class="antialiased bg-gradient-to-br from-orange-50 via-gray-50 to-orange-200 text-gray-800 min-h-screen">
+
+    <div class="min-h-screen flex">
+        {% include 'includes/_sidebar.html.twig' %}
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 flex flex-col relative overflow-hidden">
+            <!-- Animated background glow -->
+            <div class="absolute inset-0 overflow-hidden z-0">
+                <div class="absolute w-72 h-72 bg-orange-300 opacity-20 rounded-full blur-3xl top-10 left-20 animate-pulse"></div>
+                <div class="absolute w-96 h-96 bg-orange-400 opacity-30 rounded-full blur-3xl bottom-0 right-10 animate-pulse"></div>
+            </div>
+
+            <!-- HEADER -->
+            <header class="flex items-center justify-between p-5 bg-white/80 backdrop-blur-md shadow-md border-b border-orange-100 sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <button id="mobileMenuBtn" class="md:hidden p-2 rounded-md hover:bg-gray-100">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 font-montserrat">All Data Records</h1>
+                        <p class="text-sm text-gray-500 font-lato">View all records across the system</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="relative hidden lg:block">
+                        <form action="{{ path('app_search') }}" method="GET">
+                            <input type="text" name="q" placeholder="Search anything..."
+                                   class="w-72 pl-4 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 focus:outline-none transition font-lato shadow-sm" />
+                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-600 transition">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <button class="px-3 py-2 rounded-full bg-white border border-gray-200 hover:bg-orange-50 transition relative shadow-sm">
+                        <i class="fa-solid fa-bell text-orange-500"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping"></span>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"></span>
+                    </button>
+
+                    <div class="flex items-center gap-3">
+                        <img src="{{ asset('img/Julieka.jpg') }}" alt="avatar" class="w-10 h-10 rounded-full border-2 border-orange-400 object-cover shadow-md" />
+                        <div class="hidden sm:block text-sm">
+                            <div class="font-semibold text-gray-800 font-lato">Julieka Pastro</div>
+                            <div class="text-xs text-gray-500 font-lato">Admin</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- MAIN CONTENT -->
+            <main class="p-6 md:p-10 flex-1 overflow-y-auto relative z-10">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Statistics Cards -->
+                    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                        <div class="stat-card bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-xl shadow-lg border border-orange-200/50">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium opacity-90 font-lato uppercase tracking-wide">Products</div>
+                                </div>
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fa-solid fa-box text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-3xl font-extrabold font-montserrat">{{ products|length }}</div>
+                        </div>
+
+                        <div class="stat-card bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg border border-blue-200/50">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium opacity-90 font-lato uppercase tracking-wide">Orders</div>
+                                </div>
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fa-solid fa-receipt text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-3xl font-extrabold font-montserrat">{{ orders|length }}</div>
+                        </div>
+
+                        <div class="stat-card bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg border border-green-200/50">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium opacity-90 font-lato uppercase tracking-wide">Customers</div>
+                                </div>
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fa-solid fa-users text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-3xl font-extrabold font-montserrat">{{ customers|length }}</div>
+                        </div>
+
+                        <div class="stat-card bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg border border-purple-200/50">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium opacity-90 font-lato uppercase tracking-wide">Stock</div>
+                                </div>
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fa-solid fa-warehouse text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-3xl font-extrabold font-montserrat">{{ stocks|length }}</div>
+                        </div>
+
+                        <div class="stat-card bg-gradient-to-br from-red-500 to-red-600 text-white p-6 rounded-xl shadow-lg border border-red-200/50">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium opacity-90 font-lato uppercase tracking-wide">Users</div>
+                                </div>
+                                <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fa-solid fa-user-shield text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-3xl font-extrabold font-montserrat">{{ users|length }}</div>
+                        </div>
+                    </section>
+
+                    <!-- Data Tables Section -->
+                    <div class="space-y-8">
+                        <!-- Products Table -->
+                        <section class="bg-white rounded-xl shadow-lg overflow-hidden border border-orange-100">
+                            <div class="p-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+                                <h2 class="text-xl font-bold font-montserrat">
+                                    <i class="fa-solid fa-box mr-2"></i>Products ({{ products|length }})
+                                </h2>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-orange-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Material</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        {% for product in products|slice(0, 10) %}
+                                            <tr class="hover:bg-orange-50">
+                                                <td class="px-6 py-4 text-sm text-gray-700">#{{ product.id }}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-800 font-medium">{{ product.name }}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-600">{{ product.material ?? 'N/A' }}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-800">₱{{ product.price|number_format(2) }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        {% if (limit is defined) and (products|length >= limit) %}
+                                            <tr>
+                                                <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">
+                                                    Showing the latest {{ products|length }} products (limited to {{ limit }}). 
+                                                    <a href="{{ path('app_product_index') }}" class="text-orange-600 hover:underline">View all</a>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Orders Table -->
+                        <section class="bg-white rounded-xl shadow-lg overflow-hidden border border-blue-100">
+                            <div class="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                                <h2 class="text-xl font-bold font-montserrat">
+                                    <i class="fa-solid fa-receipt mr-2"></i>Orders ({{ orders|length }})
+                                </h2>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-blue-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Product</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Customer</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        {% for order in orders|slice(0, 10) %}
+                                            <tr class="hover:bg-blue-50">
+                                                <td class="px-6 py-4 text-sm text-gray-700">#{{ order.id }}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-800 font-medium">{{ order.productName ?? 'N/A' }}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-600">{{ order.customerName ?? 'N/A' }}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-800">₱{{ order.totalAmount|number_format(2) }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        {% if (limit is defined) and (orders|length >= limit) %}
+                                            <tr>
+                                                <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">
+                                                    Showing the latest {{ orders|length }} orders (limited to {{ limit }}). 
+                                                    <a href="{{ path('app_order_index') }}" class="text-blue-600 hover:underline">View all</a>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Customers Table -->
+                        <section class="bg-white rounded-xl shadow-lg overflow-hidden border border-green-100">
+                            <div class="p-6 bg-gradient-to-r from-green-500 to-green-600 text-white">
+                                <h2 class="text-xl font-bold font-montserrat">
+                                    <i class="fa-solid fa-users mr-2"></i>Customers ({{ customers|length }})
+                                </h2>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-green-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Phone</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        {% for customer in customers|slice(0, 10) %}
+                                            <tr class="hover:bg-green-50">
+                                                <td class="px-6 py-4 text-sm text-gray-700">#{{ customer.id }}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-800 font-medium">{{ customer.name }}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-600">{{ customer.emailAddress }}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-800">{{ customer.phoneNumber }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        {% if (limit is defined) and (customers|length >= limit) %}
+                                            <tr>
+                                                <td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">
+                                                    Showing the latest {{ customers|length }} customers (limited to {{ limit }}). 
+                                                    <a href="{{ path('app_customer_index') }}" class="text-green-600 hover:underline">View all</a>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Stock Table -->
+                        <section class="bg-white rounded-xl shadow-lg overflow-hidden border border-purple-100">
+                            <div class="p-6 bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+                                <h2 class="text-xl font-bold font-montserrat">
+                                    <i class="fa-solid fa-warehouse mr-2"></i>Stock Records ({{ stocks|length }})
+                                </h2>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-purple-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Product</th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Quantity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        {% for stock in stocks|slice(0, 10) %}
+                                            <tr class="hover:bg-purple-50">
+                                                <td class="px-6 py-4 text-sm text-gray-700">#{{ stock.id }}</td>
+                                                <td class="px-6 py-4 text-sm text-gray-800 font-medium">
+                                                    {% if stock.product %}
+                                                        {{ stock.product.name }}
+                                                    {% else %}
+                                                        N/A
+                                                    {% endif %}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-800">{{ stock.quantity ?? 'N/A' }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        {% if (limit is defined) and (stocks|length >= limit) %}
+                                            <tr>
+                                                <td colspan="3" class="px-6 py-4 text-sm text-gray-500 text-center">
+                                                    Showing the latest {{ stocks|length }} stock records (limited to {{ limit }}). 
+                                                    <a href="{{ path('app_stock_index') }}" class="text-purple-600 hover:underline">View all</a>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <footer class="mt-10 text-sm text-gray-500 text-center relative z-10">
+                    © 2025 <span class="text-orange-500 font-semibold">JULIEKA Admin</span> — All Rights Reserved.
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.querySelector('aside');
+        mobileBtn?.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+        });
+    </script>
+</body>
+{% endblock %}
+
+

@@ -1,0 +1,224 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Stock{% endblock %}
+
+{% block stylesheets %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Lato:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Lato', sans-serif; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; }
+    .card { transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-6px); }
+    .card-img-container { background: linear-gradient(135deg, #fff5ee 0%, #ffe4cc 100%); }
+    .badge { background: rgba(249, 115, 22, 0.12); color: #c2410c; }
+  </style>
+{% endblock %}
+
+{% block body %}
+<body class="antialiased bg-gradient-to-br from-orange-50 via-gray-50 to-orange-200 text-gray-800 min-h-screen">
+  <div class="min-h-screen flex">
+
+    <!-- SIDEBAR -->
+    <aside class="hidden md:flex flex-col w-80 bg-white shadow-lg border-r border-gray-200 p-5">
+      <div class="flex items-center justify-center mb-8">
+        <img src="{{ asset('img/PL.png') }}" alt="Logo" class="w-45">
+      </div>
+
+      <nav class="flex-1 space-y-2">
+        {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        {% elseif is_granted('ROLE_STAFF') %}
+        <a href="{{ path('app_staff_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        {% endif %}
+        <a href="{{ path('app_product_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-box"></i> Products
+        </a>
+        <a href="{{ path('app_order_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-receipt"></i> Orders
+        </a>
+        <a href="{{ path('app_stock_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md">
+          <i class="fa-solid fa-warehouse"></i> Stock
+        </a>
+        <a href="{{ path('app_customer_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-users"></i> Customers
+        </a>
+        {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('app_admin_users') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-user-shield"></i> User Management
+        </a>
+        <a href="{{ path('app_admin_records') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-database"></i> All Records
+        </a>
+        <a href="{{ path('app_admin_activity_logs') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-clipboard-list"></i> Activity Logs
+        </a>
+        <a href="{{ path('app_settings') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-gear"></i> Settings
+        </a>
+        {% endif %}
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col relative overflow-hidden">
+      <div class="absolute inset-0 overflow-hidden z-0">
+        <div class="absolute w-72 h-72 bg-orange-300 opacity-20 rounded-full blur-3xl top-10 left-20 animate-pulse"></div>
+        <div class="absolute w-96 h-96 bg-orange-400 opacity-30 rounded-full blur-3xl bottom-0 right-10 animate-pulse"></div>
+      </div>
+
+      <!-- HEADER -->
+      <header class="flex items-center justify-between p-5 bg-white/80 backdrop-blur-md shadow-md border-b border-orange-100 sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+          <button id="mobileMenuBtn" class="md:hidden p-2 rounded-md hover:bg-gray-100">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800">Stock</h1>
+            <p class="text-sm text-gray-500">Track inventory tied to products and orders</p>
+          </div>
+        </div>
+        <a href="{{ path('app_stock_new') }}"
+           class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 sm:px-6 py-2.5 rounded-lg font-semibold hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+          <i class="fa-solid fa-plus"></i> Add Stock
+        </a>
+      </header>
+
+      <!-- GRID -->
+      <main class="p-6 md:p-10 flex-1 overflow-y-auto relative z-10">
+        <div class="max-w-7xl mx-auto">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h2 class="text-3xl font-bold text-orange-600 tracking-tight mb-1">Inventory</h2>
+              <p class="text-gray-600">{{ stocks|length }} stock records</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {% set inStock = statusSummary['In Stock'] ?? {'items': 0, 'quantity': 0} %}
+            {% set lowStock = statusSummary['Low Stock'] ?? {'items': 0, 'quantity': 0} %}
+            {% set outStock = statusSummary['Out of Stock'] ?? {'items': 0, 'quantity': 0} %}
+
+            <div class="rounded-3xl bg-white border border-orange-100 shadow-sm p-6">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold uppercase tracking-wide text-gray-500">In Stock</p>
+                  <p class="mt-3 text-3xl font-bold text-gray-900">{{ inStock.items }}</p>
+                </div>
+                <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-800">In Stock</span>
+              </div>
+              <p class="mt-4 text-sm text-gray-500">Total quantity: <strong>{{ inStock.quantity }}</strong></p>
+            </div>
+
+            <div class="rounded-3xl bg-white border border-orange-100 shadow-sm p-6">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold uppercase tracking-wide text-gray-500">Low Stock</p>
+                  <p class="mt-3 text-3xl font-bold text-gray-900">{{ lowStock.items }}</p>
+                </div>
+                <span class="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-sm font-semibold text-yellow-800">Low Stock</span>
+              </div>
+              <p class="mt-4 text-sm text-gray-500">Total quantity: <strong>{{ lowStock.quantity }}</strong></p>
+            </div>
+
+            <div class="rounded-3xl bg-white border border-orange-100 shadow-sm p-6">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold uppercase tracking-wide text-gray-500">Out of Stock</p>
+                  <p class="mt-3 text-3xl font-bold text-gray-900">{{ outStock.items }}</p>
+                </div>
+                <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-800">Out of Stock</span>
+              </div>
+              <p class="mt-4 text-sm text-gray-500">Total quantity: <strong>{{ outStock.quantity }}</strong></p>
+            </div>
+          </div>
+
+          {% if stocks %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {% for stock in stocks %}
+                <div class="card bg-white rounded-xl shadow-lg overflow-hidden border border-orange-100 hover:shadow-2xl">
+                  <div class="card-img-container relative h-40 flex items-center justify-center p-4">
+                    {% if stock.product.image %}
+                      <img src="{{ asset('img/' ~ stock.product.image) }}"
+                           alt="{{ stock.product.name }}"
+                           class="w-full h-full object-contain">
+                    {% else %}
+                      <div class="flex flex-col items-center justify-center text-orange-300">
+                        <i class="fa-solid fa-image text-5xl mb-2"></i>
+                        <span class="text-sm text-gray-400">No image</span>
+                      </div>
+                    {% endif %}
+                    <div class="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      #{{ stock.id }}
+                    </div>
+                    <div class="absolute top-2 left-2 badge px-2 py-1 rounded-full text-xs font-semibold">
+                      Qty: {{ stock.quantity }}
+                    </div>
+                  </div>
+
+                  <div class="p-5 space-y-3">
+                    <div class="flex items-center gap-2">
+                      <i class="fa-solid fa-box text-orange-500"></i>
+                      <h3 class="text-lg font-bold text-gray-800 truncate">{{ stock.product.name }}</h3>
+                    </div>
+
+                    <div class="text-sm text-gray-600">
+                      <span class="inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-semibold {{ stock.status == 'In Stock' ? 'bg-green-100 text-green-800' : stock.status == 'Low Stock' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800' }}">
+                        {{ stock.status }}
+                      </span>
+                    </div>
+
+                    <div class="text-sm text-gray-600">
+                    <div class="flex items-center gap-2 text-gray-500">
+                      <i class="fa-solid fa-layer-group w-4 text-orange-500"></i>
+                      <span>Quantity: {{ stock.quantity }}</span>
+                    </div>
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
+                      <a href="{{ path('app_stock_show', {'id': stock.id}) }}"
+                         class="flex-1 flex items-center justify-center gap-2 px-3 py-2 border-2 border-orange-500 text-orange-600 rounded-lg hover:bg-orange-50 transition text-sm font-medium">
+                        <i class="fa-solid fa-eye"></i> View
+                      </a>
+                      <a href="{{ path('app_stock_edit', {'id': stock.id}) }}"
+                         class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:scale-105 transition text-sm font-medium shadow-md">
+                        <i class="fa-solid fa-pen"></i> Edit
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="rounded-2xl shadow-xl border border-orange-200 p-12 text-center bg-white/80 backdrop-blur">
+              <i class="fa-solid fa-warehouse text-6xl text-orange-300 mb-4"></i>
+              <h3 class="text-2xl font-bold text-gray-700 mb-2">No Stock Yet</h3>
+              <p class="text-gray-500 mb-6">Add stock entries to start tracking inventory.</p>
+              <a href="{{ path('app_stock_new') }}"
+                 class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-200 shadow-lg">
+                <i class="fa-solid fa-plus"></i> Add Stock
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.querySelector('aside');
+    mobileBtn?.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+    });
+  </script>
+</body>
+{% endblock %}
+

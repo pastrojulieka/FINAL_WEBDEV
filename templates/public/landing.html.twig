@@ -1,0 +1,462 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}JULIEKA{% endblock %}
+
+{% block stylesheets %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .font-montserrat { font-family: 'Montserrat', sans-serif; }
+    .font-lato { font-family: 'Lato', sans-serif; }
+    .hero-gradient { background: linear-gradient(135deg, #ff7a1f 0%, #ff6600 50%, #ff9500 100%); }
+    .about-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .dot-pattern {
+      background-image: radial-gradient(rgba(249, 115, 22, 0.12) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .card-lift {
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .card-lift:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 48px -12px rgba(234, 88, 12, 0.22);
+    }
+    .product-feature-icon {
+      background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    .hero-dot-pattern {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .hero-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(72px);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .star-gold {
+      color: #fbbf24;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+<body class="bg-gradient-to-br from-orange-50 via-white to-orange-100 min-h-screen font-lato">
+  {% include 'public/_navigation.html.twig' %}
+
+  {# HOME #}
+  <section id="home" class="relative overflow-hidden hero-gradient text-white">
+    <div class="hero-blob -top-32 left-1/4 h-80 w-80 -translate-x-1/2 bg-amber-300"></div>
+    <div class="hero-blob top-1/2 right-0 h-72 w-72 translate-x-1/4 -translate-y-1/2 bg-orange-300"></div>
+    <div class="hero-blob bottom-0 left-0 h-64 w-64 -translate-x-1/4 translate-y-1/4 bg-red-400/80"></div>
+    <div class="absolute inset-0 hero-dot-pattern opacity-90"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-16 md:py-24 lg:py-28">
+      <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        <div>
+          <h1 class="mb-6 text-4xl font-extrabold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl font-montserrat">
+            Welcome to <span class="bg-gradient-to-r from-amber-200 via-white to-amber-100 bg-clip-text text-transparent">JULIEKA</span>
+          </h1>
+          <p class="mb-8 max-w-xl text-lg leading-relaxed text-white/95 md:text-xl">
+            Your trusted source for quality products. Discover items crafted with care, backed by service that puts you first.
+          </p>
+          <div class="mb-10 grid max-w-lg grid-cols-3 gap-3 sm:gap-4">
+            <div class="rounded-2xl bg-white/10 px-3 py-4 text-center ring-1 ring-white/20 backdrop-blur-sm sm:px-4">
+              <p class="font-montserrat text-2xl font-bold text-white sm:text-3xl">100%</p>
+              <p class="mt-1 text-xs text-white/80 sm:text-sm">Commitment</p>
+            </div>
+            <div class="rounded-2xl bg-white/10 px-3 py-4 text-center ring-1 ring-white/20 backdrop-blur-sm sm:px-4">
+              <p class="font-montserrat text-2xl font-bold text-white sm:text-3xl">24/7</p>
+              <p class="mt-1 text-xs text-white/80 sm:text-sm">Support</p>
+            </div>
+            <div class="rounded-2xl bg-white/10 px-3 py-4 text-center ring-1 ring-white/20 backdrop-blur-sm sm:px-4">
+              <p class="font-montserrat text-2xl font-bold text-white sm:text-3xl">5★</p>
+              <p class="mt-1 text-xs text-white/80 sm:text-sm">Experience</p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+            <a href="#products" class="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-8 py-4 text-lg font-semibold text-orange-600 shadow-xl shadow-black/10 transition hover:scale-[1.02] hover:shadow-2xl">
+              <i class="fa-solid fa-box"></i>
+              View Products
+              <i class="fa-solid fa-arrow-down ml-1 text-sm opacity-70 transition group-hover:translate-y-0.5"></i>
+            </a>
+            <a href="{{ path('app_login') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/40 bg-orange-900/40 px-8 py-4 text-lg font-semibold text-white backdrop-blur-sm transition hover:bg-orange-900/60 hover:border-white/60">
+              <i class="fa-solid fa-right-to-bracket"></i>
+              Login to Order
+            </a>
+          </div>
+        </div>
+        <div class="relative mx-auto w-full max-w-md lg:max-w-none">
+          <div class="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-white/20 to-transparent blur-2xl"></div>
+          <div class="glass-card relative overflow-hidden rounded-[1.75rem] p-8 shadow-2xl md:p-10 bg-white/10 backdrop-blur-xl">
+            <div class="absolute -right-8 -top-8 text-8xl text-white/10">
+              <i class="fa-solid fa-leaf"></i>
+            </div>
+            <div class="relative flex flex-col items-center text-center gap-4">
+              <p class="font-montserrat text-2xl font-bold text-white md:text-3xl">Crafted for you</p>
+              <p class="max-w-xs text-sm text-white/85 md:text-base">
+                From selection to delivery, we focus on the details that make every order worthwhile.
+              </p>
+              <div class="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
+                <a href="#about" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/90 px-5 py-3 text-sm font-semibold text-orange-600 transition hover:bg-white">
+                  <i class="fa-solid fa-circle-info"></i>
+                  About us
+                </a>
+                <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white ring-1 ring-white/30 transition hover:bg-white/20">
+                  <i class="fa-solid fa-envelope"></i>
+                  Get in touch
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="max-w-7xl mx-auto px-6 py-16 space-y-16">
+    {# ABOUT US #}
+    <section id="about" class="relative overflow-hidden rounded-3xl border border-orange-100/80 bg-white shadow-xl shadow-orange-100/50">
+      <div class="about-blob -top-24 -left-24 h-72 w-72 bg-orange-300"></div>
+      <div class="about-blob bottom-0 right-0 h-64 w-64 bg-amber-200"></div>
+      <div class="relative dot-pattern p-8 md:p-12 lg:p-14">
+        <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          <div class="order-2 lg:order-1">
+            <p class="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-orange-600 font-montserrat">Our story</p>
+            <h2 class="mb-5 text-4xl font-extrabold leading-tight text-gray-900 md:text-5xl font-montserrat">
+              Built on <span class="bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent">trust</span> &amp; quality
+            </h2>
+            <p class="mb-8 text-lg leading-relaxed text-gray-600 md:text-xl">
+              JULIEKA is committed to delivering quality products and exceptional service. We focus on reliability,
+              customer satisfaction, and continuous improvement—so every order feels as good as the last.
+            </p>
+            <div class="mb-10 grid gap-4 sm:grid-cols-3">
+              <div class="card-lift rounded-2xl border border-orange-100 bg-gradient-to-b from-white to-orange-50/40 p-4 text-center">
+                <div class="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500 text-white shadow-md shadow-orange-200">
+                  <i class="fa-solid fa-award text-lg"></i>
+                </div>
+                <p class="font-montserrat text-sm font-bold text-gray-900">Quality first</p>
+                <p class="mt-1 text-xs text-gray-500">Carefully sourced items</p>
+              </div>
+              <div class="card-lift rounded-2xl border border-orange-100 bg-gradient-to-b from-white to-orange-50/40 p-4 text-center">
+                <div class="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500 text-white shadow-md shadow-orange-200">
+                  <i class="fa-solid fa-heart text-lg"></i>
+                </div>
+                <p class="font-montserrat text-sm font-bold text-gray-900">You matter</p>
+                <p class="mt-1 text-xs text-gray-500">Support that listens</p>
+              </div>
+              <div class="card-lift rounded-2xl border border-orange-100 bg-gradient-to-b from-white to-orange-50/40 p-4 text-center sm:col-span-1">
+                <div class="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500 text-white shadow-md shadow-orange-200">
+                  <i class="fa-solid fa-arrow-trend-up text-lg"></i>
+                </div>
+                <p class="font-montserrat text-sm font-bold text-gray-900">Always improving</p>
+                <p class="mt-1 text-xs text-gray-500">Better every day</p>
+              </div>
+            </div>
+            <a href="{{ path('app_about') }}" class="group inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 px-8 py-4 font-semibold text-white shadow-lg shadow-orange-300/40 transition hover:from-orange-600 hover:to-orange-700 hover:shadow-xl">
+              Learn more about us
+              <i class="fa-solid fa-arrow-right transition group-hover:translate-x-1"></i>
+            </a>
+          </div>
+          <div class="order-1 lg:order-2">
+            <div class="relative mx-auto max-w-lg">
+              <div class="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-orange-400/30 via-amber-300/20 to-transparent blur-2xl"></div>
+              <figure class="relative overflow-hidden rounded-[1.75rem] ring-4 ring-white shadow-2xl">
+                <img
+                  src="{{ asset('img/ceo.jpg') }}"
+                  alt="The JULIEKA team"
+                  class="h-[280px] w-full object-cover object-center transition duration-500 hover:scale-[1.03] sm:h-[340px] lg:h-[420px]"
+                  loading="lazy"
+                />
+                <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-6 pb-5 pt-16">
+                  <p class="font-montserrat text-lg font-bold text-white">People behind the brand</p>
+                  <p class="text-sm text-white/90">Passionate about what we deliver to you</p>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {# PRODUCTS #}
+    <section id="products" class="relative overflow-hidden rounded-3xl border border-orange-200/60 bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500 p-1 shadow-2xl shadow-orange-400/30">
+      <div class="rounded-[1.35rem] bg-gradient-to-b from-white via-orange-50/30 to-white p-8 md:p-12 lg:p-14">
+        <div class="mb-12 text-center md:mb-14">
+          <p class="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-orange-600 font-montserrat">Shop with confidence</p>
+          <h2 class="mb-4 text-4xl font-extrabold text-gray-900 md:text-5xl font-montserrat">
+            Discover our <span class="text-orange-600">products</span>
+          </h2>
+          <p class="mx-auto max-w-2xl text-lg text-gray-600 md:text-xl">
+            Browse the full collection in your dashboard. When you are ready to order, we will ask you to sign in—quick, simple, and secure.
+          </p>
+        </div>
+        <div class="mb-12 grid gap-6 md:grid-cols-3">
+          <div class="card-lift rounded-2xl border border-orange-100 bg-white p-6 shadow-md">
+            <div class="product-feature-icon mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl">
+              <i class="fa-solid fa-layer-group text-2xl text-orange-600"></i>
+            </div>
+            <h3 class="mb-2 font-montserrat text-xl font-bold text-gray-900">Curated catalog</h3>
+            <p class="text-gray-600 leading-relaxed">Explore categories and find items picked for quality and value.</p>
+          </div>
+          <div class="card-lift rounded-2xl border border-orange-100 bg-white p-6 shadow-md">
+            <div class="product-feature-icon mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl">
+              <i class="fa-solid fa-lock text-2xl text-orange-600"></i>
+            </div>
+            <h3 class="mb-2 font-montserrat text-xl font-bold text-gray-900">Secure checkout</h3>
+            <p class="text-gray-600 leading-relaxed">Log in when you order so your details stay protected.</p>
+          </div>
+          <div class="card-lift rounded-2xl border border-orange-100 bg-white p-6 shadow-md">
+            <div class="product-feature-icon mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl">
+              <i class="fa-solid fa-truck-fast text-2xl text-orange-600"></i>
+            </div>
+            <h3 class="mb-2 font-montserrat text-xl font-bold text-gray-900">Reliable fulfillment</h3>
+            <p class="text-gray-600 leading-relaxed">We work to get your order right and on its way without fuss.</p>
+          </div>
+        </div>
+        <div class="flex flex-col items-center justify-center gap-4 rounded-2xl border border-orange-100 bg-white/90 px-6 py-10 shadow-inner sm:flex-row sm:gap-6">
+          <div class="flex max-w-md flex-1 items-center gap-4 text-left">
+            <div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-orange-100">
+              <img src="{{ asset('img/PL.png') }}" alt="" class="h-9 w-auto object-contain" width="36" height="36" />
+            </div>
+            <div>
+              <p class="font-montserrat font-bold text-gray-900">Ready to browse?</p>
+              <p class="text-sm text-gray-600">Jump into the catalog or sign in to place an order.</p>
+            </div>
+          </div>
+          <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <a href="{{ path('app_user_dashboard') }}" class="inline-flex min-w-[200px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 px-8 py-4 font-semibold text-white shadow-lg shadow-orange-300/40 transition hover:from-orange-600 hover:to-orange-700 hover:shadow-xl">
+              <i class="fa-solid fa-bag-shopping"></i>
+              Browse Products
+            </a>
+            <a href="{{ path('app_login') }}" class="inline-flex min-w-[200px] items-center justify-center gap-2 rounded-xl border-2 border-orange-200 bg-white px-8 py-4 font-semibold text-orange-700 transition hover:border-orange-300 hover:bg-orange-50">
+              <i class="fa-solid fa-right-to-bracket"></i>
+              Login
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {# TESTIMONIALS #}
+    <section id="testimonials" class="relative overflow-hidden rounded-3xl border border-orange-100/80 bg-white shadow-xl shadow-orange-100/50">
+      <div class="about-blob -right-20 top-0 h-80 w-80 bg-amber-200"></div>
+      <div class="about-blob -bottom-16 -left-16 h-72 w-72 bg-orange-200"></div>
+      <div class="relative dot-pattern p-8 md:p-12 lg:p-14">
+        <div class="mb-12 text-center md:mb-14">
+          <p class="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-orange-600 font-montserrat">Love from our customers</p>
+          <h2 class="mb-4 text-4xl font-extrabold text-gray-900 md:text-5xl font-montserrat">
+            <span class="bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent">Testimonials</span>
+          </h2>
+          <p class="mx-auto max-w-2xl text-lg text-gray-600 md:text-xl">
+            Real feedback from people who shop with us—quality, care, and service that keeps them coming back.
+          </p>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <article class="card-lift relative overflow-hidden rounded-2xl border border-orange-100 bg-gradient-to-b from-white to-orange-50/30 p-6 shadow-md md:p-8">
+            <div class="absolute right-4 top-4 text-5xl text-orange-500/15">
+              <i class="fa-solid fa-quote-right"></i>
+            </div>
+            <div class="mb-4 flex gap-0.5 star-gold">
+              <i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i>
+            </div>
+            <p class="relative mb-6 text-lg leading-relaxed text-gray-700">
+              “Amazing products and super fast delivery. Highly recommended!”
+            </p>
+            <div class="flex items-center gap-4 border-t border-orange-100/80 pt-5">
+              <img src="{{ asset('img/Julieka.jpg') }}" alt="" class="h-14 w-14 rounded-full object-cover ring-4 ring-orange-100" width="56" height="56">
+              <div>
+                <p class="font-montserrat font-bold text-gray-900">Ana Reyes</p>
+                <p class="text-sm text-gray-500">Verified customer</p>
+              </div>
+            </div>
+          </article>
+          <article class="card-lift relative overflow-hidden rounded-2xl border border-orange-100 bg-gradient-to-b from-white to-orange-50/30 p-6 shadow-md md:p-8">
+            <div class="absolute right-4 top-4 text-5xl text-orange-500/15">
+              <i class="fa-solid fa-quote-right"></i>
+            </div>
+            <div class="mb-4 flex gap-0.5 star-gold">
+              <i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i>
+            </div>
+            <p class="relative mb-6 text-lg leading-relaxed text-gray-700">
+              “Great customer support and quality. I’ll definitely order again.”
+            </p>
+            <div class="flex items-center gap-4 border-t border-orange-100/80 pt-5">
+              <img src="{{ asset('img/Julieka.jpg') }}" alt="" class="h-14 w-14 rounded-full object-cover ring-4 ring-orange-100" width="56" height="56">
+              <div>
+                <p class="font-montserrat font-bold text-gray-900">Marco Dela Cruz</p>
+                <p class="text-sm text-gray-500">Verified customer</p>
+              </div>
+            </div>
+          </article>
+          <article class="card-lift relative overflow-hidden rounded-2xl border border-orange-100 bg-gradient-to-b from-white to-orange-50/30 p-6 shadow-md md:p-8 md:col-span-2 lg:col-span-1">
+            <div class="absolute right-4 top-4 text-5xl text-orange-500/15">
+              <i class="fa-solid fa-quote-right"></i>
+            </div>
+            <div class="mb-4 flex gap-0.5 star-gold">
+              <i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i><i class="fa-solid fa-star text-sm"></i>
+            </div>
+            <p class="relative mb-6 text-lg leading-relaxed text-gray-700">
+              “Beautiful packaging and the product matched the description perfectly.”
+            </p>
+            <div class="flex items-center gap-4 border-t border-orange-100/80 pt-5">
+              <img src="{{ asset('img/Julieka.jpg') }}" alt="" class="h-14 w-14 rounded-full object-cover ring-4 ring-orange-100" width="56" height="56">
+              <div>
+                <p class="font-montserrat font-bold text-gray-900">Leah Johnson</p>
+                <p class="text-sm text-gray-500">Verified customer</p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="mt-10 text-center">
+          <a href="{{ path('app_testimonials') }}" class="group inline-flex items-center gap-2 rounded-2xl border-2 border-orange-200 bg-white px-6 py-3 font-semibold text-orange-700 shadow-sm transition hover:border-orange-300 hover:bg-orange-50">
+            Read more stories
+            <i class="fa-solid fa-arrow-right text-sm transition group-hover:translate-x-1"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {# CONTACT #}
+    <section id="contact" class="relative overflow-hidden rounded-3xl border border-orange-200/60 bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500 p-1 shadow-2xl shadow-orange-400/30">
+      <div class="rounded-[1.35rem] bg-gradient-to-b from-white via-orange-50/30 to-white p-8 md:p-12 lg:p-14">
+        <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <p class="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-orange-600 font-montserrat">We are here for you</p>
+            <h2 class="mb-5 text-4xl font-extrabold leading-tight text-gray-900 md:text-5xl font-montserrat">
+              Let’s <span class="text-orange-600">talk</span>
+            </h2>
+            <p class="mb-8 text-lg leading-relaxed text-gray-600 md:text-xl">
+              Questions about an order, a product, or anything else? Send us a message—we read every note and reply as soon as we can.
+            </p>
+            <ul class="space-y-4">
+              <li class="flex gap-4 rounded-2xl border border-orange-100 bg-white p-4 shadow-sm">
+                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-md shadow-orange-200">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </div>
+                <div>
+                  <p class="font-montserrat font-bold text-gray-900">Contact form</p>
+                  <p class="text-sm text-gray-600">Tell us what you need in a few quick fields.</p>
+                </div>
+              </li>
+              <li class="flex gap-4 rounded-2xl border border-orange-100 bg-white p-4 shadow-sm">
+                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-md shadow-orange-200">
+                  <i class="fa-solid fa-clock"></i>
+                </div>
+                <div>
+                  <p class="font-montserrat font-bold text-gray-900">Timely replies</p>
+                  <p class="text-sm text-gray-600">We aim to get back to you without keeping you waiting.</p>
+                </div>
+              </li>
+              <li class="flex gap-4 rounded-2xl border border-orange-100 bg-white p-4 shadow-sm">
+                <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-md shadow-orange-200">
+                  <i class="fa-solid fa-handshake"></i>
+                </div>
+                <div>
+                  <p class="font-montserrat font-bold text-gray-900">Friendly support</p>
+                  <p class="text-sm text-gray-600">Real people, clear answers—no runaround.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="relative">
+            <div class="absolute -inset-2 rounded-[1.75rem] bg-gradient-to-br from-orange-400/25 to-amber-300/20 blur-xl"></div>
+            <div class="relative overflow-hidden rounded-[1.75rem] border border-orange-100 bg-white p-8 shadow-xl md:p-10">
+              <div class="mb-6 flex items-center gap-4">
+                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg">
+                  <i class="fa-solid fa-envelope-open-text text-2xl"></i>
+                </div>
+                <div>
+                  <p class="font-montserrat text-lg font-bold text-gray-900">Start the conversation</p>
+                  <p class="text-sm text-gray-500">Opens our full contact page</p>
+                </div>
+              </div>
+              <p class="mb-8 text-gray-600 leading-relaxed">
+                Share your name, email, and message—we will route it to the right person on our team.
+              </p>
+              <a href="{{ path('app_contact') }}" class="group mb-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 px-8 py-4 font-semibold text-white shadow-lg shadow-orange-300/40 transition hover:from-orange-600 hover:to-orange-700 hover:shadow-xl">
+                Go to contact form
+                <i class="fa-solid fa-arrow-right transition group-hover:translate-x-1"></i>
+              </a>
+              <a href="#home" class="flex w-full items-center justify-center gap-2 rounded-xl border border-orange-100 py-3 text-sm font-semibold text-orange-700 transition hover:bg-orange-50">
+                <i class="fa-solid fa-arrow-up"></i>
+                Back to top
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="relative mt-8 border-t border-orange-200/60 bg-gradient-to-b from-gray-900 via-gray-900 to-black text-gray-300">
+    <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent"></div>
+    <div class="max-w-7xl mx-auto px-6 py-14 md:py-16">
+      <div class="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+        <div class="lg:col-span-1">
+          <a href="#home" class="inline-flex items-center gap-3 mb-4">
+            <img src="{{ asset('img/PL.png') }}" alt="JULIEKA" class="h-11 w-auto drop-shadow-md" />
+          </a>
+          <p class="text-sm leading-relaxed text-gray-400">
+            Quality products and service you can trust. Crafted with care, delivered with pride.
+          </p>
+        </div>
+        <div>
+          <h3 class="font-montserrat text-sm font-bold uppercase tracking-wider text-white mb-4">On this page</h3>
+          <ul class="space-y-3 text-sm">
+            <li><a href="#home" class="hover:text-orange-400 transition">Home</a></li>
+            <li><a href="#about" class="hover:text-orange-400 transition">About Us</a></li>
+            <li><a href="#products" class="hover:text-orange-400 transition">Products</a></li>
+            <li><a href="#testimonials" class="hover:text-orange-400 transition">Testimonials</a></li>
+            <li><a href="#contact" class="hover:text-orange-400 transition">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-montserrat text-sm font-bold uppercase tracking-wider text-white mb-4">Company</h3>
+          <ul class="space-y-3 text-sm">
+            <li><a href="{{ path('app_about') }}" class="hover:text-orange-400 transition">About page</a></li>
+            <li><a href="{{ path('app_contact') }}" class="hover:text-orange-400 transition">Contact form</a></li>
+            <li><a href="{{ path('app_testimonials') }}" class="hover:text-orange-400 transition">Testimonials</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-montserrat text-sm font-bold uppercase tracking-wider text-white mb-4">Account</h3>
+          <ul class="space-y-3 text-sm">
+            {% if app.user %}
+              <li><a href="{{ path('app_user_dashboard') }}" class="hover:text-orange-400 transition">Dashboard</a></li>
+              <li><a href="{{ path('app_logout') }}" class="hover:text-orange-400 transition">Logout</a></li>
+            {% else %}
+              <li><a href="{{ path('app_login') }}" class="hover:text-orange-400 transition">Login</a></li>
+              <li><a href="{{ path('app_register') }}" class="hover:text-orange-400 transition">Register</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+      <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+        <p class="text-center text-xs text-gray-500 md:text-left">
+          © {{ "now"|date("Y") }} <span class="text-orange-400/90 font-semibold">JULIEKA</span>. All rights reserved.
+        </p>
+        <p class="text-center text-xs text-gray-600 md:text-right">
+          Built with care for our customers.
+        </p>
+      </div>
+    </div>
+  </footer>
+</body>
+{% endblock %}
+

@@ -1,0 +1,214 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home - Welcome{% endblock %}
+
+{% block stylesheets %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .font-montserrat { font-family: 'Montserrat', sans-serif; }
+    .font-lato { font-family: 'Lato', sans-serif; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+    
+    .hero-gradient {
+      background: linear-gradient(135deg, #ff7a1f 0%, #ff6600 50%, #ff9500 100%);
+    }
+    
+    .product-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(249, 115, 22, 0.2);
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+<body class="bg-gradient-to-br from-orange-50 via-white to-orange-100 min-h-screen font-lato">
+  
+  {% include 'public/_navigation.html.twig' %}
+
+  <!-- HERO SECTION -->
+  <section class="hero-gradient text-white py-20 fade-in">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="max-w-3xl">
+        <h1 class="text-5xl md:text-6xl font-bold mb-6 font-montserrat">
+          Welcome to JULIEKA
+        </h1>
+        <p class="text-xl md:text-2xl mb-8 font-lato opacity-95">
+          Your trusted source for quality products. Discover our amazing collection of items crafted with care and attention to detail.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="{{ path('app_user_dashboard') }}" class="px-8 py-4 bg-white text-orange-600 rounded-xl font-semibold hover:shadow-2xl transition font-lato text-lg">
+            <i class="fa-solid fa-box mr-2"></i>
+            Browse Products
+          </a>
+          <a href="{{ path('app_about') }}" class="px-8 py-4 bg-orange-700 text-white rounded-xl font-semibold hover:bg-orange-800 transition font-lato text-lg">
+            <i class="fa-solid fa-info-circle mr-2"></i>
+            Learn More
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section class="py-16 fade-in" style="animation-delay: 0.2s;">
+    <div class="max-w-7xl mx-auto px-6">
+      <h2 class="text-4xl font-bold text-center text-gray-800 mb-12 font-montserrat">
+        Why Choose Us?
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-orange-100">
+          <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-star text-white text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-3 font-montserrat">Quality Products</h3>
+          <p class="text-gray-600 font-lato">We offer only the finest quality products that meet our high standards.</p>
+        </div>
+        
+        <div class="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-orange-100">
+          <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-shipping-fast text-white text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-3 font-montserrat">Fast Delivery</h3>
+          <p class="text-gray-600 font-lato">Quick and reliable shipping to get your products to you as soon as possible.</p>
+        </div>
+        
+        <div class="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-orange-100">
+          <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-headset text-white text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-3 font-montserrat">Customer Support</h3>
+          <p class="text-gray-600 font-lato">Our dedicated team is here to help you with any questions or concerns.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  {% if featuredProducts|length > 0 %}
+    <section class="py-16 bg-white fade-in" style="animation-delay: 0.4s;">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="flex justify-between items-center mb-12">
+          <h2 class="text-4xl font-bold text-gray-800 font-montserrat">
+            <i class="fa-solid fa-fire text-orange-600 mr-2"></i>
+            Featured Products
+          </h2>
+          <a href="{{ path('app_user_dashboard') }}" class="text-orange-600 hover:text-orange-700 font-semibold font-lato">
+            View All <i class="fa-solid fa-arrow-right ml-1"></i>
+          </a>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {% for product in featuredProducts %}
+            <div class="product-card bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-orange-100">
+              <div class="product-image-container relative h-48 flex items-center justify-center p-4 bg-gradient-to-br from-orange-50 to-orange-100">
+                {% if product.image %}
+                  <img src="{{ asset('img/' ~ product.image) }}" 
+                       alt="{{ product.name }}" 
+                       class="w-full h-full object-contain">
+                {% else %}
+                  <div class="flex flex-col items-center justify-center text-orange-300">
+                    <i class="fa-solid fa-image text-5xl mb-2"></i>
+                    <span class="text-sm text-gray-400 font-lato">No image</span>
+                  </div>
+                {% endif %}
+              </div>
+              
+              <div class="p-5">
+                <h3 class="text-lg font-bold text-gray-800 mb-2 font-montserrat truncate">
+                  {{ product.name }}
+                </h3>
+                <p class="text-sm text-gray-600 mb-4 font-lato line-clamp-2">
+                  {{ product.description }}
+                </p>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-baseline gap-1">
+                    <i class="fa-solid fa-peso-sign text-orange-600"></i>
+                    <span class="text-2xl font-bold text-orange-600 font-montserrat">{{ product.price }}</span>
+                  </div>
+                  <a href="{{ path('app_user_dashboard') }}" class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition font-lato font-semibold text-sm">
+                    View
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  {% endif %}
+
+  <footer class="relative mt-16 border-t border-orange-200/60 bg-gradient-to-b from-gray-900 via-gray-900 to-black text-gray-300">
+    <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent"></div>
+    <div class="max-w-7xl mx-auto px-6 py-14 md:py-16">
+      <div class="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <a href="{{ path('app_landing') }}" class="inline-flex items-center gap-3 mb-4">
+            <img src="{{ asset('img/PL.png') }}" alt="JULIEKA" class="h-11 w-auto drop-shadow-md" />
+          </a>
+          <p class="text-sm leading-relaxed text-gray-400">
+            Quality products and service you can trust. Crafted with care, delivered with pride.
+          </p>
+        </div>
+        <div>
+          <h3 class="font-montserrat text-sm font-bold uppercase tracking-wider text-white mb-4">Explore</h3>
+          <ul class="space-y-3 text-sm">
+            <li><a href="{{ path('app_landing') }}" class="hover:text-orange-400 transition">Landing page</a></li>
+            <li><a href="{{ path('app_about') }}" class="hover:text-orange-400 transition">About Us</a></li>
+            <li><a href="{{ path('app_contact') }}" class="hover:text-orange-400 transition">Contact</a></li>
+            <li><a href="{{ path('app_testimonials') }}" class="hover:text-orange-400 transition">Testimonials</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-montserrat text-sm font-bold uppercase tracking-wider text-white mb-4">Shop</h3>
+          <ul class="space-y-3 text-sm">
+            <li><a href="{{ path('app_user_dashboard') }}" class="hover:text-orange-400 transition">Browse products</a></li>
+            {% if app.user %}
+              <li><a href="{{ path('app_logout') }}" class="hover:text-orange-400 transition">Logout</a></li>
+            {% else %}
+              <li><a href="{{ path('app_login') }}" class="hover:text-orange-400 transition">Login</a></li>
+              <li><a href="{{ path('app_register') }}" class="hover:text-orange-400 transition">Register</a></li>
+            {% endif %}
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-montserrat text-sm font-bold uppercase tracking-wider text-white mb-4">Stay in touch</h3>
+          <p class="text-sm text-gray-400 mb-3">Questions? We are happy to help.</p>
+          <a href="{{ path('app_contact') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-orange-400 hover:text-orange-300 transition">
+            <i class="fa-solid fa-envelope"></i>
+            Contact form
+          </a>
+          {% if app.user %}
+            <p class="mt-4 text-xs text-gray-500">
+              Signed in as <span class="text-orange-400/90 font-medium">{{ app.user.email }}</span>
+            </p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+        <p class="text-center text-xs text-gray-500 md:text-left">
+          © {{ "now"|date("Y") }} <span class="text-orange-400/90 font-semibold">JULIEKA</span>. All rights reserved.
+        </p>
+        <p class="text-center text-xs text-gray-600 md:text-right">
+          Built with care for our customers.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+{% endblock %}
+

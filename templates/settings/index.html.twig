@@ -1,0 +1,392 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Settings{% endblock %}
+
+{% block stylesheets %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Sidebar text visibility in dark mode */
+    .dark-mode aside a {
+      color: #e5e7eb !important;
+    }
+    .dark-mode aside a:hover {
+      color: #f97316 !important;
+      background-color: rgba(249, 115, 22, 0.1) !important;
+    }
+    .dark-mode aside .bg-gradient-to-r {
+      color: #fff !important;
+    }
+    .font-montserrat { font-family: 'Montserrat', sans-serif; }
+    .font-lato { font-family: 'Lato', sans-serif; }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .settings-card {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .settings-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      transition: transform 0.5s ease;
+    }
+    
+    .settings-card:hover::before {
+      transform: scale(1.5);
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 52px;
+      height: 28px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ddd;
+      transition: 0.3s;
+      border-radius: 28px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background: linear-gradient(135deg, #ff9800 0%, #e65100 100%);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Dark Mode Styles */
+    .dark-mode {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+    }
+    
+    .dark-mode .bg-white {
+      background-color: #2d2d2d !important;
+    }
+    
+    .dark-mode .bg-white\/80 {
+      background-color: rgba(45, 45, 45, 0.8) !important;
+    }
+    
+    .dark-mode .text-gray-800 {
+      color: #f0f0f0 !important;
+    }
+    
+    .dark-mode .text-gray-500 {
+      color: #a0a0a0 !important;
+    }
+    
+    .dark-mode .text-gray-600 {
+      color: #b0b0b0 !important;
+    }
+    
+    .dark-mode .border-gray-200,
+    .dark-mode .border-gray-100 {
+      border-color: #404040 !important;
+    }
+    
+    .dark-mode .border-orange-100 {
+      border-color: #ff9800 !important;
+    }
+    
+    .dark-mode input[type="text"],
+    .dark-mode input[type="number"] {
+      background-color: #1a1a1a !important;
+      border-color: #404040 !important;
+      color: #f0f0f0 !important;
+    }
+
+    /* Compact View Styles */
+    .compact-view main {
+      padding: 1rem !important;
+    }
+    
+    .compact-view .settings-card {
+      padding: 1rem !important;
+    }
+    
+    .compact-view .space-y-5 > div {
+      padding-top: 0.5rem !important;
+      padding-bottom: 0.5rem !important;
+    }
+    
+    .compact-view .gap-6 {
+      gap: 1rem !important;
+    }
+
+    /* No Animations */
+    .no-animations * {
+      animation: none !important;
+      transition: none !important;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+<body class="antialiased bg-gradient-to-br from-orange-50 via-gray-50 to-orange-100 text-gray-800 min-h-screen font-lato">
+  <div class="min-h-screen flex">
+    
+    <!-- SIDEBAR -->
+    <aside class="hidden md:flex flex-col w-80 bg-white shadow-lg border-r border-gray-200 p-5">
+      <div class="flex items-center justify-center mb-8">
+        <img src="{{ asset('img/PL.png') }}" alt="Logo" class="w-45">
+      </div>
+
+      <nav class="flex-1 space-y-2">
+        <a href="{{ path('app_dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        <a href="{{ path('app_product_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-box"></i> Products
+        </a>
+        <a href="{{ path('app_order_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-receipt"></i> Orders
+        </a>
+        <a href="{{ path('app_stock_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-warehouse"></i> Stock
+        </a>
+        <a href="{{ path('app_customer_index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-users"></i> Customers
+        </a>
+        <a href="{{ path('app_settings') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md">
+          <i class="fa-solid fa-gear"></i> Settings
+        </a>
+      </nav>
+
+      <div class="mt-6">
+        <p class="text-xs uppercase text-gray-400 mb-2 font-montserrat tracking-wide">Quick actions</p>
+        <a href="{{ path('app_logout') }}" class="w-full py-2 rounded-lg text-white font-medium shadow-md hover:shadow-lg transition transform hover:scale-105 block text-center"
+                style="background: linear-gradient(135deg, #ff7a1f, #ff6600);">
+          <i class="fa-solid fa-right-from-bracket mr-1"></i> Logout
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 flex flex-col relative overflow-hidden">
+      
+      <!-- Animated Background Elements -->
+      <div class="absolute inset-0 overflow-hidden z-0 pointer-events-none">
+        <div class="absolute w-96 h-96 bg-orange-300 opacity-20 rounded-full blur-3xl -top-20 -left-20 float-animation"></div>
+        <div class="absolute w-80 h-80 bg-orange-400 opacity-25 rounded-full blur-3xl top-40 right-10 float-animation" style="animation-delay: 1s;"></div>
+        <div class="absolute w-64 h-64 bg-orange-200 opacity-20 rounded-full blur-3xl bottom-20 left-1/3 float-animation" style="animation-delay: 2s;"></div>
+      </div>
+
+      <!-- HEADER -->
+      <header class="flex items-center justify-between p-5 bg-white/80 backdrop-blur-md shadow-md border-b border-orange-100 sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+          <button id="mobileMenuBtn" class="md:hidden p-2 rounded-md hover:bg-gray-100">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800 font-montserrat">Settings</h1>
+            <p class="text-sm text-gray-500 font-lato">Manage your application preferences</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="relative hidden lg:block">
+            <form action="{{ path('app_search') }}" method="GET">
+              <input type="text" name="q" placeholder="Search anything..."
+                     class="w-72 pl-4 pr-10 py-2.5 rounded-lg border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 focus:outline-none transition font-lato shadow-sm" />
+              <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-orange-600 transition">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </button>
+            </form>
+          </div>
+
+          <button class="px-3 py-2 rounded-full bg-white border border-gray-200 hover:bg-orange-50 transition relative shadow-sm">
+            <i class="fa-solid fa-bell text-orange-500"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping"></span>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"></span>
+          </button>
+
+          <div class="flex items-center gap-3">
+            <img src="{{ asset('img/Julieka.jpg') }}" alt="avatar" class="w-10 h-10 rounded-full border-2 border-orange-400 object-cover shadow-md" />
+            <div class="hidden sm:block text-sm">
+              <div class="font-semibold text-gray-800 font-lato">Julieka Pastro</div>
+              <div class="text-xs text-gray-500 font-lato">Admin</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT -->
+      <main class="p-6 flex-1 overflow-y-auto relative z-5">
+        
+        <!-- SETTINGS GRID -->
+        <section class="max-w-6xl mx-auto w-full mb-8">
+          <!-- Appearance -->
+          <div class="settings-card bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg border border-orange-100 hover:shadow-xl transition-all duration-300 w-full">
+            <div class="flex items-center gap-4 mb-6 pb-4 border-b-2 border-orange-100">
+              <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md">
+                <i class="fa-solid fa-palette text-white text-xl"></i>
+              </div>
+              <h2 class="text-xl font-bold text-orange-600 font-montserrat">Appearance</h2>
+            </div>
+            
+            <div class="space-y-5">
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex-1">
+                  <div class="font-medium text-gray-800 font-lato mb-1">Dark Mode</div>
+                  <div class="text-sm text-gray-500 font-lato">Use dark theme</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="darkModeToggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex-1">
+                  <div class="font-medium text-gray-800 font-lato mb-1">Compact View</div>
+                  <div class="text-sm text-gray-500 font-lato">Reduce spacing</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="compactViewToggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              
+              <div class="flex items-center justify-between py-3">
+                <div class="flex-1">
+                  <div class="font-medium text-gray-800 font-lato mb-1">Animations</div>
+                  <div class="text-sm text-gray-500 font-lato">Enable UI transitions</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="animationsToggle" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end gap-4 mb-8">
+          <button class="px-6 py-3 rounded-lg border-2 border-orange-500 text-orange-600 font-medium hover:bg-orange-50 transition transform hover:scale-105 font-lato">
+            <i class="fa-solid fa-rotate-left mr-2"></i>Reset to Default
+          </button>
+          <button class="px-6 py-3 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 text-white font-medium shadow-md hover:shadow-lg transition transform hover:scale-105 font-lato">
+            <i class="fa-solid fa-floppy-disk mr-2"></i>Save Changes
+          </button>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="mt-12 pt-6 border-t border-gray-200 text-center">
+          <p class="text-sm text-gray-500 font-lato">
+            © 2025 <span class="text-orange-600 font-semibold font-montserrat">JULIEKA Admin</span>. All rights reserved.
+          </p>
+          <p class="text-xs text-gray-400 mt-1 font-lato">Built with modern web technologies</p>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const sidebar = document.querySelector('aside');
+    mobileBtn?.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+    });
+
+    // Dark Mode Toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+    
+    // Check if dark mode was previously enabled
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      body.classList.add('dark-mode');
+      darkModeToggle.checked = true;
+    }
+    
+    darkModeToggle?.addEventListener('change', function() {
+      if (this.checked) {
+        body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', 'enabled');
+      } else {
+        body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode', 'disabled');
+      }
+    });
+
+    // Compact View Toggle
+    const compactViewToggle = document.getElementById('compactViewToggle');
+    
+    if (localStorage.getItem('compactView') === 'enabled') {
+      body.classList.add('compact-view');
+      compactViewToggle.checked = true;
+    }
+    
+    compactViewToggle?.addEventListener('change', function() {
+      if (this.checked) {
+        body.classList.add('compact-view');
+        localStorage.setItem('compactView', 'enabled');
+      } else {
+        body.classList.remove('compact-view');
+        localStorage.setItem('compactView', 'disabled');
+      }
+    });
+
+    // Animations Toggle
+    const animationsToggle = document.getElementById('animationsToggle');
+    
+    if (localStorage.getItem('animations') === 'disabled') {
+      body.classList.add('no-animations');
+      animationsToggle.checked = false;
+    }
+    
+    animationsToggle?.addEventListener('change', function() {
+      if (this.checked) {
+        body.classList.remove('no-animations');
+        localStorage.setItem('animations', 'enabled');
+      } else {
+        body.classList.add('no-animations');
+        localStorage.setItem('animations', 'disabled');
+      }
+    });
+  </script>
+</body>
+{% endblock %}

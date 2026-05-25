@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Testimonials{% endblock %}
+
+{% block stylesheets %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .font-montserrat { font-family: 'Montserrat', sans-serif; }
+    .font-lato { font-family: 'Lato', sans-serif; }
+  </style>
+{% endblock %}
+
+{% block body %}
+<body class="bg-gradient-to-br from-orange-50 via-white to-orange-100 min-h-screen font-lato">
+  {% include 'public/_navigation.html.twig' %}
+
+  <section class="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-20">
+    <div class="max-w-7xl mx-auto px-6 text-center">
+      <h1 class="text-5xl md:text-6xl font-bold mb-6 font-montserrat">Testimonials</h1>
+      <p class="text-xl md:text-2xl opacity-95 max-w-3xl mx-auto">
+        What our customers say about JULIEKA.
+      </p>
+    </div>
+  </section>
+
+  <main class="max-w-7xl mx-auto px-6 py-16">
+    <section class="max-w-4xl mx-auto">
+      <div class="space-y-6">
+        <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-100">
+          <div class="flex items-start gap-4">
+            <img
+              src="{{ asset('img/Julieka.jpg') }}"
+              alt="Ana Reyes"
+              class="w-14 h-14 rounded-full object-cover border-2 border-orange-200 flex-shrink-0"
+            >
+            <div>
+              <p class="text-base font-semibold text-gray-800 font-montserrat mb-2">Ana Reyes</p>
+              <p class="text-gray-700 text-lg leading-relaxed">
+                “Amazing products and super fast delivery. Highly recommended!”
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-100">
+          <div class="flex items-start gap-4">
+            <img
+              src="{{ asset('img/Julieka.jpg') }}"
+              alt="Marco Dela Cruz"
+              class="w-14 h-14 rounded-full object-cover border-2 border-orange-200 flex-shrink-0"
+            >
+            <div>
+              <p class="text-base font-semibold text-gray-800 font-montserrat mb-2">Marco Dela Cruz</p>
+              <p class="text-gray-700 text-lg leading-relaxed">
+                “Great customer support and quality. I’ll definitely order again.”
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg p-8 border-2 border-orange-100">
+          <div class="flex items-start gap-4">
+            <img
+              src="{{ asset('img/Julieka.jpg') }}"
+              alt="Leah Johnson"
+              class="w-14 h-14 rounded-full object-cover border-2 border-orange-200 flex-shrink-0"
+            >
+            <div>
+              <p class="text-base font-semibold text-gray-800 font-montserrat mb-2">Leah Johnson</p>
+              <p class="text-gray-700 text-lg leading-relaxed">
+                “Beautiful packaging and the product matched the description perfectly.”
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+{% endblock %}
+
