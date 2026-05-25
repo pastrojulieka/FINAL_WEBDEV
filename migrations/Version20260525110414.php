@@ -121,43 +121,57 @@ final class Version20260525110414 extends AbstractMigration
             $this->addSql('CREATE TABLE messenger_messages (id BIGINT AUTO_INCREMENT NOT NULL, body LONGTEXT NOT NULL, headers LONGTEXT NOT NULL, queue_name VARCHAR(190) NOT NULL, created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', available_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', delivered_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_75EA56E0FB7336F0 (queue_name), INDEX IDX_75EA56E0E3BD61CE (available_at), INDEX IDX_75EA56E016BA31DB (delivered_at), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         }
 
+        // Helper to check if a foreign key exists
+        $foreignKeyExists = function(string $tableName, string $constraintName) use ($sm): bool {
+            if (!$sm->tablesExist([$tableName])) {
+                return false;
+            }
+            $fks = $sm->listTableForeignKeys($tableName);
+            foreach ($fks as $fk) {
+                if ($fk->getName() === $constraintName) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
         // Add constraints safely
-        try {
+        if (!$foreignKeyExists('activity_log', 'FK_FD06F647A76ED395')) {
             $this->addSql('ALTER TABLE activity_log ADD CONSTRAINT FK_FD06F647A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE SET NULL');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('booking', 'FK_E00CEDDEB03A8386')) {
             $this->addSql('ALTER TABLE booking ADD CONSTRAINT FK_E00CEDDEB03A8386 FOREIGN KEY (created_by_id) REFERENCES user (id)');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('cart', 'FK_BA388B7A76ED395')) {
             $this->addSql('ALTER TABLE cart ADD CONSTRAINT FK_BA388B7A76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('cart_item', 'FK_F0FE25271AD5CDBF')) {
             $this->addSql('ALTER TABLE cart_item ADD CONSTRAINT FK_F0FE25271AD5CDBF FOREIGN KEY (cart_id) REFERENCES cart (id)');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('cart_item', 'FK_F0FE25274584665A')) {
             $this->addSql('ALTER TABLE cart_item ADD CONSTRAINT FK_F0FE25274584665A FOREIGN KEY (product_id) REFERENCES product (id)');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('customer', 'FK_81398E09B03A8386')) {
             $this->addSql('ALTER TABLE customer ADD CONSTRAINT FK_81398E09B03A8386 FOREIGN KEY (created_by_id) REFERENCES user (id)');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('order', 'FK_F5299398B03A8386')) {
             $this->addSql('ALTER TABLE `order` ADD CONSTRAINT FK_F5299398B03A8386 FOREIGN KEY (created_by_id) REFERENCES user (id)');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('product', 'FK_D34A04ADB03A8386')) {
             $this->addSql('ALTER TABLE product ADD CONSTRAINT FK_D34A04ADB03A8386 FOREIGN KEY (created_by_id) REFERENCES user (id)');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('product_category', 'FK_CDFC73564584665A')) {
             $this->addSql('ALTER TABLE product_category ADD CONSTRAINT FK_CDFC73564584665A FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('product_category', 'FK_CDFC735612469DE2')) {
             $this->addSql('ALTER TABLE product_category ADD CONSTRAINT FK_CDFC735612469DE2 FOREIGN KEY (category_id) REFERENCES category (id) ON DELETE CASCADE');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('stock', 'FK_4B3656604584665A')) {
             $this->addSql('ALTER TABLE stock ADD CONSTRAINT FK_4B3656604584665A FOREIGN KEY (product_id) REFERENCES product (id)');
-        } catch (\Exception $e) {}
-        try {
+        }
+        if (!$foreignKeyExists('stock', 'FK_4B365660B03A8386')) {
             $this->addSql('ALTER TABLE stock ADD CONSTRAINT FK_4B365660B03A8386 FOREIGN KEY (created_by_id) REFERENCES user (id)');
-        } catch (\Exception $e) {}
+        }
     }
 
     public function down(Schema $schema): void
