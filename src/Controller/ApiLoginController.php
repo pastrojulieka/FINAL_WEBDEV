@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ApiLoginController extends AbstractController
 {
-    #[Route('/api/login', name: 'api_login', methods: ['POST','GET'])]
+    #[Route('/api/login', name: 'api_login', methods: ['POST', 'GET'])]
     public function login(
         Request $request,
         UserRepository $userRepository,
@@ -45,14 +45,8 @@ class ApiLoginController extends AbstractController
             ], 401);
         }
 
-        if (!$user->isVerified()) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Please verify your email address before logging in',
-                'verified' => false,
-            ], 403);
-        }
-
+        // For API access, allow unverified users to get JWT token
+        // Email verification can be done after login
         $token = $jwtManager->create($user);
 
         return new JsonResponse([
