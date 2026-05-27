@@ -20,11 +20,14 @@ class StockType extends AbstractType
             ->add('product', EntityType::class, [
                 'class' => Product::class,
                 'choice_label' => 'name',
-                'placeholder' => 'Select product'
+                'placeholder' => 'Select product',
+                'required' => true,
+                'attr' => ['class' => 'form-control']
             ])
             ->add('quantity', IntegerType::class, [
                 'label' => 'Quantity',
-                'attr' => ['min' => 0]
+                'attr' => ['min' => 0, 'class' => 'form-control'],
+                'required' => true,
             ])
             ->add('status', ChoiceType::class, [
                 'label' => 'Status',
@@ -34,6 +37,8 @@ class StockType extends AbstractType
                     'Out of Stock' => 'Out of Stock',
                 ],
                 'placeholder' => 'Select status',
+                'attr' => ['class' => 'form-control'],
+                'required' => true,
             ])
         ;
     }
@@ -42,7 +47,9 @@ class StockType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Stock::class,
+            'csrf_protection' => true,
+            'csrf_field_name' => '_token',
+            'csrf_token_id' => 'stock_item',
         ]);
     }
 }
-

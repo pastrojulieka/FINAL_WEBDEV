@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\StockRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: StockRepository::class)]
 class Stock
@@ -15,12 +16,16 @@ class Stock
 
     #[ORM\ManyToOne(inversedBy: 'stocks')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Product is required')]
     private ?Product $product = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'Quantity is required')]
+    #[Assert\GreaterThanOrEqual(0, message: 'Quantity must be 0 or greater')]
     private ?int $quantity = null;
 
     #[ORM\Column(length: 20)]
+    #[Assert\NotBlank(message: 'Status is required')]
     private ?string $status = 'In Stock';
 
     #[ORM\ManyToOne]
@@ -77,4 +82,3 @@ class Stock
         return $this;
     }
 }
-

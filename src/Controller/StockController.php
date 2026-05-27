@@ -17,8 +17,7 @@ class StockController extends AbstractController
 {
     public function __construct(
         private ActivityLogService $activityLogService,
-    ) {
-    }
+    ) {}
     #[Route('/', name: 'app_stock_index', methods: ['GET'])]
     public function index(StockRepository $stockRepository): Response
     {
@@ -35,24 +34,40 @@ class StockController extends AbstractController
         $form = $this->createForm(StockType::class, $stock);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Set createdBy if user is logged in
-            if ($this->getUser()) {
-                $stock->setCreatedBy($this->getUser());
+        if ($form->isSubmitted()) {
+            error_log('Stock form submitted. Is valid: ' . ($form->isValid() ? 'yes' : 'no'));
+
+            if ($form->isValid()) {
+                try {
+                    // Set createdBy if user is logged in
+                    if ($this->getUser()) {
+                        $stock->setCreatedBy($this->getUser());
+                    }
+                    $stockRepository->save($stock, true);
+
+                    // Log the creation
+                    $this->activityLogService->log(
+                        $this->getUser(),
+                        ActivityLog::ACTION_CREATE,
+                        'Stock',
+                        (string)$stock->getId(),
+                        "Created stock for product: {$stock->getProduct()->getName()}"
+                    );
+
+                    $this->addFlash('success', 'Stock created successfully! ID: ' . $stock->getId());
+                    return $this->redirectToRoute('app_stock_index', [], Response::HTTP_SEE_OTHER);
+                } catch (\Exception $e) {
+                    error_log('Stock save error: ' . $e->getMessage());
+                    $this->addFlash('error', 'Error saving stock: ' . $e->getMessage());
+                }
+            } else {
+                // Form has validation errors - show them to user
+                error_log('Form validation failed');
+                foreach ($form->getErrors(true) as $error) {
+                    error_log('Error: ' . $error->getMessage());
+                    $this->addFlash('error', $error->getMessage());
+                }
             }
-            $stockRepository->save($stock, true);
-
-            // Log the creation
-            $this->activityLogService->log(
-                $this->getUser(),
-                ActivityLog::ACTION_CREATE,
-                'Stock',
-                (string)$stock->getId(),
-                "Created stock for product: {$stock->getProduct()->getName()}"
-            );
-
-            $this->addFlash('success', 'Stock created successfully!');
-            return $this->redirectToRoute('app_stock_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('stock/new.html.twig', [
@@ -112,7 +127,7 @@ class StockController extends AbstractController
             }
         }
 
-        if ($this->isCsrfTokenValid('delete'.$stock->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $stock->getId(), $request->request->get('_token'))) {
             $productName = $stock->getProduct()->getName(); // Store name before deletion
             $stockId = (string)$stock->getId();
 
