@@ -18,8 +18,7 @@ final class ProductController extends AbstractController
 {
     public function __construct(
         private ActivityLogService $activityLogService,
-    ) {
-    }
+    ) {}
     #[Route(name: 'app_product_index', methods: ['GET'])]
     public function index(ProductRepository $productRepository): Response
     {
@@ -50,25 +49,32 @@ final class ProductController extends AbstractController
         $form = $this->createForm(Product1Type::class, $product);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Set createdBy if user is logged in
-            if ($this->getUser()) {
-                $product->setCreatedBy($this->getUser());
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                // Set createdBy if user is logged in
+                if ($this->getUser()) {
+                    $product->setCreatedBy($this->getUser());
+                }
+                $entityManager->persist($product);
+                $entityManager->flush();
+
+                // Log the creation
+                $this->activityLogService->log(
+                    $this->getUser(),
+                    ActivityLog::ACTION_CREATE,
+                    'Product',
+                    (string)$product->getId(),
+                    "Created product: {$product->getName()}"
+                );
+
+                $this->addFlash('success', 'Product created successfully!');
+                return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
+            } else {
+                // Form has validation errors - show them to user
+                foreach ($form->getErrors(true) as $error) {
+                    $this->addFlash('error', 'Error: ' . $error->getMessage());
+                }
             }
-            $entityManager->persist($product);
-            $entityManager->flush();
-
-            // Log the creation
-            $this->activityLogService->log(
-                $this->getUser(),
-                ActivityLog::ACTION_CREATE,
-                'Product',
-                (string)$product->getId(),
-                "Created product: {$product->getName()}"
-            );
-
-            $this->addFlash('success', 'Product created successfully!');
-            return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('product/new.html.twig', [
@@ -140,7 +146,7 @@ final class ProductController extends AbstractController
             }
         }
 
-        if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $product->getId(), $request->getPayload()->getString('_token'))) {
             $productName = $product->getName(); // Store name before deletion
             $productId = (string)$product->getId();
 
