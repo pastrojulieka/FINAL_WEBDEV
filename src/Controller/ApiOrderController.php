@@ -37,17 +37,8 @@ class ApiOrderController extends AbstractController
             // Staff/Admin — return all orders
             $orders = $orderRepository->findBy([], ['date' => 'DESC']);
         } else {
-            // Customer — filter by customer_name query param
-            $customerName = $request->query->get('customer_name');
-
-            if (!$customerName) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'customer_name query parameter is required'
-                ], 400);
-            }
-
-            $orders = $orderRepository->findBy(['customer_name' => $customerName], ['date' => 'DESC']);
+            // Customer — return their own orders (filter by created_by)
+            $orders = $orderRepository->findBy(['createdBy' => $user], ['date' => 'DESC']);
         }
 
         $orderData = [];
