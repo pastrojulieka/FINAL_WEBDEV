@@ -159,7 +159,25 @@
 
           <!-- Form Card -->
           <div class="glass rounded-2xl shadow-xl border border-orange-100 p-8 mb-6">
-            {{ form_start(form, {'attr': {'class': 'product-form'}}) }}
+            
+            <!-- Show all form errors at the top -->
+            {% if form.vars.errors|length > 0 %}
+              <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                  <i class="fa-solid fa-circle-exclamation text-red-600 mt-1"></i>
+                  <div>
+                    <h4 class="font-semibold text-red-800 mb-2">Form Errors:</h4>
+                    <ul class="list-disc list-inside space-y-1">
+                      {% for error in form.vars.errors %}
+                        <li class="text-red-700">{{ error.message }}</li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+            {{ form_start(form, {'attr': {'class': 'product-form', 'novalidate': 'novalidate'}}) }}
             
             <style>
               .product-form {

@@ -50,29 +50,39 @@ final class ProductController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
+            // Log for debugging
+            error_log('Product form submitted. Is valid: ' . ($form->isValid() ? 'yes' : 'no'));
+
             if ($form->isValid()) {
-                // Set createdBy if user is logged in
-                if ($this->getUser()) {
-                    $product->setCreatedBy($this->getUser());
+                try {
+                    // Set createdBy if user is logged in
+                    if ($this->getUser()) {
+                        $product->setCreatedBy($this->getUser());
+                    }
+                    $entityManager->persist($product);
+                    $entityManager->flush();
+
+                    // Log the creation
+                    $this->activityLogService->log(
+                        $this->getUser(),
+                        ActivityLog::ACTION_CREATE,
+                        'Product',
+                        (string)$product->getId(),
+                        "Created product: {$product->getName()}"
+                    );
+
+                    $this->addFlash('success', 'Product created successfully! ID: ' . $product->getId());
+                    return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
+                } catch (\Exception $e) {
+                    error_log('Product save error: ' . $e->getMessage());
+                    $this->addFlash('error', 'Error saving product: ' . $e->getMessage());
                 }
-                $entityManager->persist($product);
-                $entityManager->flush();
-
-                // Log the creation
-                $this->activityLogService->log(
-                    $this->getUser(),
-                    ActivityLog::ACTION_CREATE,
-                    'Product',
-                    (string)$product->getId(),
-                    "Created product: {$product->getName()}"
-                );
-
-                $this->addFlash('success', 'Product created successfully!');
-                return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
             } else {
                 // Form has validation errors - show them to user
+                error_log('Form validation failed');
                 foreach ($form->getErrors(true) as $error) {
-                    $this->addFlash('error', 'Error: ' . $error->getMessage());
+                    error_log('Error: ' . $error->getMessage());
+                    $this->addFlash('error', $error->getMessage());
                 }
             }
         }
