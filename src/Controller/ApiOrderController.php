@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\StockRepository;
+use App\Service\OrderLiveService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,6 +18,11 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api')]
 class ApiOrderController extends AbstractController
 {
+    public function __construct(
+        private OrderLiveService $orderLiveService,
+    ) {
+    }
+
     #[Route('/orders', name: 'api_orders', methods: ['GET'])]
     public function getOrders(Request $request, OrderRepository $orderRepository): JsonResponse
     {
@@ -39,8 +45,23 @@ class ApiOrderController extends AbstractController
             $orders = $orderRepository->findBy(['createdBy' => $user], ['date' => 'DESC']);
         }
 
+        $version = $this->orderLiveService->computeFingerprint($orders);
+        $clientVersion = $request->query->getString('version');
+
+        if ($clientVersion !== '' && $clientVersion === $version) {
+            return new JsonResponse([
+                'success' => true,
+                'changed' => false,
+                'version' => $version,
+                'count' => \count($orders),
+            ], headers: ['Cache-Control' => 'no-store, no-cache, must-revalidate']);
+        }
+
         return new JsonResponse([
             'success' => true,
+            'changed' => true,
+            'version' => $version,
+            'count' => \count($orders),
             'data' => array_map([$this, 'serializeOrder'], $orders),
         ], headers: ['Cache-Control' => 'no-store, no-cache, must-revalidate']);
     }

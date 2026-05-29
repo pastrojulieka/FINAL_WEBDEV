@@ -306,102 +306,7 @@
 
           <!-- Order Cards Grid -->
           <div id="orderGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {% for order in orders %}
-            <div class="order-card" 
-                 data-customer="{{ order.customerName|lower }}"
-                 data-product="{{ order.productName|lower }}"
-                 data-material="{{ order.material|lower }}"
-                 data-color="{{ order.color|lower }}"
-                 data-date="{{ order.date ? order.date|date('Y-m-d') : '' }}">
-              
-              <!-- Card Header -->
-              <div class="order-card-header">
-                <div class="flex justify-between items-start mb-2">
-                  <div>
-                    <span class="text-xs opacity-80">Order #{{ order.id }}</span>
-                    <h3 class="text-lg font-bold mt-1">{{ order.customerName }}</h3>
-                  </div>
-                  <span class="badge badge-info">{{ order.date ? order.date|date('M d') : 'N/A' }}</span>
-                </div>
-                <p class="text-sm opacity-90">{{ order.productName }}</p>
-              </div>
-
-              <!-- Card Body -->
-              <div class="p-5">
-                
-                <!-- Product Details -->
-                <div class="info-row">
-                  <div class="info-icon" style="background: #ffedd5;">
-                    <i class="fa-solid fa-palette text-orange-600"></i>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Material & Color</p>
-                    <p class="font-semibold text-gray-800">{{ order.material }} • {{ order.color }}</p>
-                  </div>
-                </div>
-
-                <!-- Quantity -->
-                <div class="info-row">
-                  <div class="info-icon" style="background: #fed7aa;">
-                    <i class="fa-solid fa-boxes-stacked text-orange-700"></i>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Quantity</p>
-                    <p class="font-semibold text-gray-800">{{ order.quantity }} units</p>
-                  </div>
-                </div>
-
-                <!-- Pricing -->
-                <div class="info-row">
-                  <div class="info-icon" style="background: #fb923c;">
-                    <i class="fa-solid fa-peso-sign text-white"></i>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Total Amount</p>
-                    <p class="font-bold text-xl text-orange-600">₱{{ order.totalAmount }}</p>
-                  </div>
-                </div>
-
-                <!-- Delivery Date -->
-                <div class="info-row">
-                  <div class="info-icon" style="background: #fdba74;">
-                    <i class="fa-solid fa-truck text-orange-800"></i>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Delivery Date</p>
-                    <p class="font-semibold text-gray-800">{{ order.deliveryDate ? order.deliveryDate|date('M d, Y') : 'Not set' }}</p>
-                  </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex gap-2 mt-6 pt-4 border-t border-orange-100">
-                  <a href="{{ path('app_order_show', {'id': order.id}) }}" 
-                     class="flex-1 text-center px-4 py-2.5 bg-white border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition-all duration-200 text-sm">
-                    <i class="fa-solid fa-eye mr-1"></i> View
-                  </a>
-                  <a href="{{ path('app_order_edit', {'id': order.id}) }}" 
-                     class="flex-1 text-center px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-200 text-sm">
-                    <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
-                  </a>
-                  <form method="post" action="{{ path('app_order_delete', {'id': order.id}) }}" class="flex-1" onsubmit="return confirm('Delete order #{{ order.id }}?');">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
-                    <button type="submit" class="w-full px-4 py-2.5 bg-white border-2 border-red-500 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-all duration-200 text-sm">
-                      <i class="fa-solid fa-trash-alt mr-1"></i> Delete
-                    </button>
-                  </form>
-                </div>
-
-              </div>
-            </div>
-            {% else %}
-            <div class="col-span-full">
-              <div class="empty-state">
-                <i class="fa-solid fa-inbox"></i>
-                <h3 class="text-xl font-bold text-orange-600 mb-2">No Orders Found</h3>
-                <p class="text-orange-500">Start by creating your first order</p>
-              </div>
-            </div>
-            {% endfor %}
+            {% include 'order/_cards.html.twig' %}
           </div>
 
           <!-- Empty State (hidden by default, shown when search has no results) -->
@@ -433,15 +338,19 @@
     // Search functionality
     const searchInput = document.getElementById('searchInput');
     const orderGrid = document.getElementById('orderGrid');
-    const orderCards = orderGrid.querySelectorAll('.order-card');
     const emptyState = document.getElementById('emptyState');
     const orderCount = document.getElementById('orderCount');
 
+    function getOrderCards() {
+      return orderGrid.querySelectorAll('.order-card');
+    }
+
     function updateOrderCount() {
+      const orderCards = getOrderCards();
       const visibleCards = Array.from(orderCards).filter(card => !card.classList.contains('hidden'));
       orderCount.textContent = visibleCards.length;
       
-      if (visibleCards.length === 0) {
+      if (visibleCards.length === 0 && orderCards.length > 0) {
         orderGrid.classList.add('hidden');
         emptyState.classList.remove('hidden');
       } else {
@@ -452,6 +361,7 @@
 
     searchInput.addEventListener('input', (e) => {
       const searchTerm = e.target.value.toLowerCase();
+      const orderCards = getOrderCards();
       
       orderCards.forEach(card => {
         const customer = card.dataset.customer;
@@ -479,13 +389,13 @@
     
     filterChips.forEach(chip => {
       chip.addEventListener('click', () => {
-        // Update active state
         filterChips.forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         
         const filter = chip.dataset.filter;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        const orderCards = getOrderCards();
         
         orderCards.forEach(card => {
           const orderDate = new Date(card.dataset.date);
@@ -513,11 +423,23 @@
           }
         });
         
-        // Clear search when changing filters
         searchInput.value = '';
         updateOrderCount();
       });
     });
+  </script>
+
+  {% include 'includes/_live_poll.html.twig' %}
+  <script>
+    LiveOrders.start('{{ path('app_live_orders') }}', function (data) {
+      const grid = document.getElementById('orderGrid');
+      if (grid && data.html) {
+        grid.innerHTML = data.html;
+        document.getElementById('orderCount').textContent = data.count;
+        grid.classList.remove('hidden');
+        document.getElementById('emptyState')?.classList.add('hidden');
+      }
+    }, {{ orders|length }});
   </script>
 </body>
 {% endblock %}

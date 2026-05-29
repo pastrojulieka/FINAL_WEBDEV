@@ -1,0 +1,88 @@
+{% for order in orders %}
+<div class="order-card" 
+     data-order-id="{{ order.id }}"
+     data-customer="{{ order.customerName|lower }}"
+     data-product="{{ order.productName|lower }}"
+     data-material="{{ order.material|lower }}"
+     data-color="{{ order.color|lower }}"
+     data-date="{{ order.date ? order.date|date('Y-m-d') : '' }}">
+  
+  <div class="order-card-header">
+    <div class="flex justify-between items-start mb-2">
+      <div>
+        <span class="text-xs opacity-80">Order #{{ order.id }}</span>
+        <h3 class="text-lg font-bold mt-1">{{ order.customerName }}</h3>
+      </div>
+      <span class="badge badge-info">{{ order.date ? order.date|date('M d') : 'N/A' }}</span>
+    </div>
+    <p class="text-sm opacity-90">{{ order.productName }}</p>
+  </div>
+
+  <div class="p-5">
+    <div class="info-row">
+      <div class="info-icon" style="background: #ffedd5;">
+        <i class="fa-solid fa-palette text-orange-600"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Material & Color</p>
+        <p class="font-semibold text-gray-800">{{ order.material }} • {{ order.color }}</p>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-icon" style="background: #fed7aa;">
+        <i class="fa-solid fa-boxes-stacked text-orange-700"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Quantity</p>
+        <p class="font-semibold text-gray-800">{{ order.quantity }} units</p>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-icon" style="background: #fb923c;">
+        <i class="fa-solid fa-peso-sign text-white"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Total Amount</p>
+        <p class="font-bold text-xl text-orange-600">₱{{ order.totalAmount }}</p>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-icon" style="background: #fdba74;">
+        <i class="fa-solid fa-truck text-orange-800"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-xs text-orange-700 uppercase tracking-wide font-semibold">Delivery Date</p>
+        <p class="font-semibold text-gray-800">{{ order.deliveryDate ? order.deliveryDate|date('M d, Y') : 'Not set' }}</p>
+      </div>
+    </div>
+
+    <div class="flex gap-2 mt-6 pt-4 border-t border-orange-100">
+      <a href="{{ path('app_order_show', {'id': order.id}) }}" 
+         class="flex-1 text-center px-4 py-2.5 bg-white border-2 border-orange-500 text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition-all duration-200 text-sm">
+        <i class="fa-solid fa-eye mr-1"></i> View
+      </a>
+      <a href="{{ path('app_order_edit', {'id': order.id}) }}" 
+         class="flex-1 text-center px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-200 text-sm">
+        <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+      </a>
+      <form method="post" action="{{ path('app_order_delete', {'id': order.id}) }}" class="flex-1" onsubmit="return confirm('Delete order #{{ order.id }}?');">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ order.id) }}">
+        <button type="submit" class="w-full px-4 py-2.5 bg-white border-2 border-red-500 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-all duration-200 text-sm">
+          <i class="fa-solid fa-trash-alt mr-1"></i> Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="col-span-full">
+  <div class="empty-state">
+    <i class="fa-solid fa-inbox"></i>
+    <h3 class="text-xl font-bold text-orange-600 mb-2">No Orders Found</h3>
+    <p class="text-orange-500">Start by creating your first order</p>
+  </div>
+</div>
+{% endfor %}

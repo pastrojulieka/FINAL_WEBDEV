@@ -1,0 +1,144 @@
+<div id="liveOrderToast" class="fixed top-5 right-5 z-50 hidden transform transition-all duration-300 translate-x-full opacity-0">
+  <div class="bg-white border-2 border-orange-400 shadow-2xl rounded-xl px-5 py-4 flex items-center gap-3 max-w-sm">
+    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+      <i class="fa-solid fa-bell text-orange-600"></i>
+    </div>
+    <div>
+      <p class="font-semibold text-gray-800 text-sm" id="liveOrderToastTitle">New order received</p>
+      <p class="text-xs text-gray-500" id="liveOrderToastMessage">Orders list updated</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const POLL_MS = 4000;
+
+  function showToast(title, message) {
+    const toast = document.getElementById('liveOrderToast');
+    if (!toast) return;
+    document.getElementById('liveOrderToastTitle').textContent = title;
+    document.getElementById('liveOrderToastMessage').textContent = message;
+    toast.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      toast.classList.remove('translate-x-full', 'opacity-0');
+    });
+    setTimeout(() => {
+      toast.classList.add('translate-x-full', 'opacity-0');
+      setTimeout(() => toast.classList.add('hidden'), 300);
+    }, 4500);
+  }
+
+  window.LiveOrders = {
+    pollUrl: null,
+    version: '',
+    count: 0,
+    onUpdate: null,
+
+    async poll() {
+      if (!this.pollUrl) return;
+      try {
+        const url = this.version
+          ? `${this.pollUrl}?version=${encodeURIComponent(this.version)}`
+          : this.pollUrl;
+        const res = await fetch(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'same-origin',
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.success) return;
+
+        if (data.changed) {
+          const prevCount = this.count;
+          this.version = data.version;
+          this.count = data.count ?? this.count;
+          if (typeof this.onUpdate === 'function') {
+            this.onUpdate(data, prevCount);
+          }
+          if (prevCount > 0 && data.count > prevCount) {
+            showToast('New order received', `${data.count - prevCount} new order(s) added`);
+          } else if (prevCount > 0 && data.changed) {
+            showToast('Orders updated', 'Order list refreshed automatically');
+          }
+        } else if (data.version) {
+          this.version = data.version;
+        }
+      } catch (e) {
+        console.debug('Live order poll skipped:', e);
+      }
+    },
+
+    start(pollUrl, onUpdate, initialCount) {
+      this.pollUrl = pollUrl;
+      this.onUpdate = onUpdate;
+      this.count = initialCount ?? 0;
+      this.poll();
+      setInterval(() => this.poll(), POLL_MS);
+    },
+  };
+
+  window.LiveDashboard = {
+    pollUrl: null,
+    version: '',
+
+    async poll() {
+      if (!this.pollUrl) return;
+      try {
+        const url = this.version
+          ? `${this.pollUrl}?version=${encodeURIComponent(this.version)}`
+          : this.pollUrl;
+        const res = await fetch(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'same-origin',
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.success) return;
+
+        if (data.changed) {
+          const prevVersion = this.version;
+          this.version = data.version;
+
+          if (data.stats) {
+            const revenueEl = document.getElementById('liveTotalRevenue');
+            const revenueDescEl = document.getElementById('liveRevenueDesc');
+            const ordersEl = document.getElementById('liveTotalOrders');
+            const ordersDescEl = document.getElementById('liveOrdersDesc');
+            const myOrdersEl = document.getElementById('liveMyOrders');
+            const allOrdersEl = document.getElementById('liveAllOrders');
+
+            if (revenueEl && data.stats.totalRevenue) revenueEl.textContent = data.stats.totalRevenue;
+            if (revenueDescEl && data.stats.revenueDesc) revenueDescEl.textContent = data.stats.revenueDesc;
+            if (ordersEl && data.stats.totalOrders) ordersEl.textContent = data.stats.totalOrders;
+            if (ordersDescEl && data.stats.ordersDesc) ordersDescEl.textContent = data.stats.ordersDesc;
+            if (myOrdersEl && data.stats.myOrders) myOrdersEl.textContent = data.stats.myOrders;
+            if (allOrdersEl && data.stats.totalOrders) allOrdersEl.textContent = data.stats.totalOrders;
+          }
+
+          if (data.activitiesHtml) {
+            const container = document.getElementById('liveActivities');
+            if (container) {
+              container.innerHTML = data.activitiesHtml;
+            }
+          }
+
+          if (prevVersion) {
+            showToast('Dashboard updated', 'New activity detected');
+          }
+        } else if (data.version) {
+          this.version = data.version;
+        }
+      } catch (e) {
+        console.debug('Live dashboard poll skipped:', e);
+      }
+    },
+
+    start(pollUrl) {
+      this.pollUrl = pollUrl;
+      this.poll();
+      setInterval(() => this.poll(), POLL_MS);
+    },
+  };
+})();
+</script>

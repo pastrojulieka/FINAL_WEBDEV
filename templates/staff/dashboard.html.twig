@@ -146,7 +146,7 @@
                 </div>
               </div>
               
-              <div class="mt-3 text-3xl font-extrabold font-montserrat">{{ stat.value }}</div>
+              <div class="mt-3 text-3xl font-extrabold font-montserrat"{% if stat.label == 'My Orders' %} id="liveMyOrders"{% endif %}>{{ stat.value }}</div>
               
               <div class="flex items-center gap-2 mt-3">
                 <span class="flex items-center gap-1 text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm font-lato">
@@ -226,7 +226,7 @@
             </a>
           </div>
           
-          <div class="space-y-4">
+          <div class="space-y-4" id="liveActivities">
             {% if activities is empty %}
               <div class="text-center py-12">
                 <i class="fa-solid fa-inbox text-5xl text-gray-300 mb-4"></i>
@@ -266,6 +266,11 @@
     mobileBtn?.addEventListener('click', () => {
       sidebar.classList.toggle('hidden');
     });
+  </script>
+
+  {% include 'includes/_live_poll.html.twig' %}
+  <script>
+    LiveDashboard.start('{{ path('app_live_staff_dashboard') }}');
   </script>
 </body>
 {% endblock %}

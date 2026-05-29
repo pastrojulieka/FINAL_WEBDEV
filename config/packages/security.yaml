@@ -63,6 +63,7 @@ security:
         - { path: ^/staff, roles: ROLE_STAFF }
 
         # Staff management routes
+        - { path: ^/live, roles: ROLE_STAFF }
         - { path: ^/order, roles: ROLE_STAFF }
         - { path: ^/customer, roles: ROLE_STAFF }
         - { path: ^/stock, roles: ROLE_STAFF }
