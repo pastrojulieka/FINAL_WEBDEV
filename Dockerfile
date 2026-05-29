@@ -39,7 +39,7 @@ RUN npm install && npm run build
 # Create a default .env file if one does not already exist.
 RUN if [ ! -f /app/.env ]; then \
     DB_URL=${DATABASE_URL:-${MYSQL_URL:-mysql://root@127.0.0.1:3306/app_db?serverVersion=8.0}}; \
-    echo "APP_ENV=${APP_ENV:-prod}\nAPP_DEBUG=${APP_DEBUG:-false}\nAPP_SECRET=${APP_SECRET:-ChangeMe}\nDEFAULT_URI=${DEFAULT_URI:-http://localhost}\nDATABASE_URL=$DB_URL\nMAILER_DSN=${MAILER_DSN:-null://null}\nMESSENGER_TRANSPORT_DSN=${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}\n" > /app/.env; \
+    echo "APP_ENV=${APP_ENV:-prod}\nAPP_DEBUG=${APP_DEBUG:-false}\nAPP_SECRET=${APP_SECRET:-ChangeMe}\nDEFAULT_URI=${DEFAULT_URI:-http://localhost}\nDATABASE_URL=$DB_URL\nMAILER_DSN=${MAILER_DSN:-null://null}\nMESSENGER_TRANSPORT_DSN=${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}\nFIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID:-}\nFIREBASE_CREDENTIALS_JSON=${FIREBASE_CREDENTIALS_JSON:-}\nFIREBASE_SERVER_KEY=${FIREBASE_SERVER_KEY:-}\n" > /app/.env; \
     fi
 
 # Reinstall dependencies and optimize the autoloader for production.

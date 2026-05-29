@@ -10,13 +10,24 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class PushNotificationService
 {
+    private string $firebaseProjectId;
+    private ?string $firebaseCredentialsJson;
+    private ?string $firebaseServerKey;
+
     public function __construct(
         private HttpClientInterface $httpClient,
         private LoggerInterface $logger,
-        private string $firebaseProjectId = '',
-        private ?string $firebaseCredentialsJson = null,
-        private ?string $firebaseServerKey = null,
+        ?string $firebaseProjectId = null,
+        ?string $firebaseCredentialsJson = null,
+        ?string $firebaseServerKey = null,
     ) {
+        $this->firebaseProjectId = $firebaseProjectId ?? '';
+        $this->firebaseCredentialsJson = ($firebaseCredentialsJson !== null && $firebaseCredentialsJson !== '')
+            ? $firebaseCredentialsJson
+            : null;
+        $this->firebaseServerKey = ($firebaseServerKey !== null && $firebaseServerKey !== '')
+            ? $firebaseServerKey
+            : null;
     }
 
     public function isConfigured(): bool
