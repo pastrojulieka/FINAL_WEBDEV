@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,9 +18,9 @@ class ApiLoginController extends AbstractController
         Request $request,
         UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
-        JWTTokenManagerInterface $jwtManager
+        JWTTokenManagerInterface $jwtManager,
+        EntityManagerInterface $entityManager,
     ): JsonResponse {
-
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !isset($data['email'], $data['password'])) {
@@ -45,8 +46,12 @@ class ApiLoginController extends AbstractController
             ], 401);
         }
 
-        // For API access, allow unverified users to get JWT token
-        // Email verification can be done after login
+        if (!$user->isVerified()) {
+            $user->setIsVerified(true);
+            $user->setVerificationToken(null);
+            $entityManager->flush();
+        }
+
         $token = $jwtManager->create($user);
 
         return new JsonResponse([
@@ -57,8 +62,8 @@ class ApiLoginController extends AbstractController
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
-                'isVerified' => $user->isVerified(),
-            ]
+                'verified' => $user->isVerified(),
+            ],
         ]);
     }
 }

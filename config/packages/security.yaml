@@ -21,12 +21,7 @@ security:
         login:
             pattern: ^/api/login
             stateless: true
-            provider: app_user_provider
-            json_login:
-                check_path: /api/login
-                username_path: email
-                password_path: password
-                success_handler: App\Security\JWTAuthenticationSuccessHandler
+            security: false
 
         api_platform:     
             pattern: ^/api
