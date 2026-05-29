@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\Product;
 use App\Entity\Cart;
 use App\Entity\CartItem;
+use App\Entity\Order;
+use App\Entity\Product;
+use App\Repository\StockRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -212,5 +214,91 @@ class CartController extends AbstractController
         }
 
         return new JsonResponse(['success' => false, 'message' => 'Item not found'], 404);
+    }
+
+    #[Route('/cart/checkout', name: 'app_cart_checkout', methods: ['POST'])]
+    public function checkout(Request $request, EntityManagerInterface $em, StockRepository $stockRepository): Response
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'Please log in to complete checkout.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $cart = $em->getRepository(Cart::class)->findOneBy(['user' => $user]);
+        $sessionCart = $request->getSession()->get('cart', []);
+        $items = [];
+
+        if ($cart && $cart->getItems()->count() > 0) {
+            foreach ($cart->getItems() as $item) {
+                $items[] = ['product' => $item->getProduct(), 'quantity' => $item->getQuantity()];
+            }
+        } elseif (!empty($sessionCart)) {
+            foreach ($sessionCart as $pid => $qty) {
+                $product = $em->getRepository(Product::class)->find((int) $pid);
+                if ($product) {
+                    $items[] = ['product' => $product, 'quantity' => (int) $qty];
+                }
+            }
+        }
+
+        if (empty($items)) {
+            $this->addFlash('error', 'Your cart is empty.');
+            return $this->redirectToRoute('app_cart');
+        }
+
+        $customerName = $user->getUserIdentifier();
+        $createdOrders = 0;
+
+        foreach ($items as $item) {
+            /** @var Product $product */
+            $product = $item['product'];
+            $quantity = $item['quantity'];
+
+            $stocks = $stockRepository->findBy(['product' => $product]);
+            $totalStock = array_sum(array_map(fn ($s) => $s->getQuantity(), $stocks));
+            if (count($stocks) === 0) {
+                $totalStock = $product->getQuantity();
+            }
+
+            if ($totalStock < $quantity) {
+                $this->addFlash('error', "Insufficient stock for {$product->getName()}. Available: {$totalStock}.");
+                return $this->redirectToRoute('app_cart');
+            }
+
+            $order = new Order();
+            $order->setCustomerName($customerName);
+            $order->setProductName($product->getName());
+            $order->setMaterial($product->getMaterial());
+            $order->setColor($product->getColor());
+            $order->setQuantity($quantity);
+            $order->setPrice($product->getPrice());
+            $order->setTotalAmount($product->getPrice() * $quantity);
+            $order->setDate(new \DateTime());
+            $order->setDeliveryDate(new \DateTimeImmutable('+7 days'));
+            $order->setCreatedBy($user);
+
+            $product->setQuantity($product->getQuantity() - $quantity);
+            $em->persist($order);
+            ++$createdOrders;
+        }
+
+        if ($cart) {
+            foreach ($cart->getItems()->toArray() as $item) {
+                $cart->removeItem($item);
+                $em->remove($item);
+            }
+        }
+        $request->getSession()->remove('cart');
+
+        $em->flush();
+
+        $this->addFlash('success', "{$createdOrders} order(s) placed successfully!");
+
+        if ($this->isGranted('ROLE_STAFF')) {
+            return $this->redirectToRoute('app_order_index');
+        }
+
+        return $this->redirectToRoute('app_user_dashboard');
     }
 }

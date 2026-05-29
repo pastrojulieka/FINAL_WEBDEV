@@ -1,4 +1,8 @@
 security:
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_STAFF
+        ROLE_STAFF: ROLE_USER
+
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         App\Entity\User:
@@ -57,6 +61,11 @@ security:
         # Staff routes
         - { path: ^/staff/google, roles: PUBLIC_ACCESS }
         - { path: ^/staff, roles: ROLE_STAFF }
+
+        # Staff management routes
+        - { path: ^/order, roles: ROLE_STAFF }
+        - { path: ^/customer, roles: ROLE_STAFF }
+        - { path: ^/stock, roles: ROLE_STAFF }
         
         # User routes
         # Allow public browsing of products (ordering/cart still requires login)

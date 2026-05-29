@@ -113,7 +113,7 @@
                     <div class="flex items-center gap-3">
                         <img src="{{ asset('img/Bed.png') }}" alt="avatar" class="w-10 h-10 rounded-full border-2 border-orange-400 object-cover shadow-md" />
                         <div class="hidden sm:block text-sm">
-                            <div class="font-semibold text-gray-800 font-lato">{{ app.user.email }}</div>
+                            <div class="font-semibold text-gray-800 font-lato">{% if app.user %}{{ app.user.email }}{% else %}Guest{% endif %}</div>
                             <div class="text-xs text-gray-500 font-lato">
                                 {% if is_granted('ROLE_ADMIN') %}
                                   Admin
@@ -494,6 +494,21 @@
                 closeDeleteModal();
             }
         });
+
+        // Auto-calculate total when quantity or price changes
+        const qtyField = document.querySelector('[name="order1[quantity]"]');
+        const priceField = document.querySelector('[name="order1[price]"]');
+        const totalField = document.querySelector('[name="order1[total_amount]"]');
+
+        function recalcTotal() {
+            if (!qtyField || !priceField || !totalField) return;
+            const qty = parseFloat(qtyField.value) || 0;
+            const price = parseFloat(priceField.value) || 0;
+            totalField.value = (qty * price).toFixed(2);
+        }
+
+        qtyField?.addEventListener('input', recalcTotal);
+        priceField?.addEventListener('input', recalcTotal);
     </script>
 </body>
 {% endblock %}

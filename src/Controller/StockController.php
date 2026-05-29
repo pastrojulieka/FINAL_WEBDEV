@@ -127,7 +127,12 @@ class StockController extends AbstractController
             }
         }
 
-        if ($this->isCsrfTokenValid('delete' . $stock->getId(), $request->request->get('_token'))) {
+        $token = $request->getPayload()->getString('_token');
+        if ($token === '' && $request->request->has('_token')) {
+            $token = (string) $request->request->get('_token');
+        }
+
+        if ($this->isCsrfTokenValid('delete' . $stock->getId(), $token)) {
             $productName = $stock->getProduct()->getName(); // Store name before deletion
             $stockId = (string)$stock->getId();
 
