@@ -7,6 +7,7 @@ use App\Entity\Order;
 use App\Form\Order1Type;
 use App\Repository\OrderRepository;
 use App\Service\ActivityLogService;
+use App\Repository\UserRepository;
 use App\Service\PushNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,6 +21,7 @@ final class OrderController extends AbstractController
     public function __construct(
         private ActivityLogService $activityLogService,
         private PushNotificationService $pushNotificationService,
+        private UserRepository $userRepository,
     ) {
     }
 
@@ -102,7 +104,7 @@ final class OrderController extends AbstractController
             $entityManager->persist($order);
             $entityManager->flush();
 
-            $this->pushNotificationService->notifyOrderUpdated($order);
+            $this->notifyCustomerAboutOrderUpdate($order);
 
             $this->activityLogService->log(
                 $this->getUser(),
@@ -180,5 +182,21 @@ final class OrderController extends AbstractController
         if ($order->getDeliveryDate() === null) {
             $order->setDeliveryDate(new \DateTimeImmutable('+7 days'));
         }
+    }
+
+    private function notifyCustomerAboutOrderUpdate(Order $order): void
+    {
+        $customer = $order->getCreatedBy();
+        if ($customer === null) {
+            return;
+        }
+
+        $freshCustomer = $this->userRepository->find($customer->getId());
+        if ($freshCustomer === null) {
+            return;
+        }
+
+        $order->setCreatedBy($freshCustomer);
+        $this->pushNotificationService->notifyOrderUpdated($order);
     }
 }

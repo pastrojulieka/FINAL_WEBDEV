@@ -83,6 +83,11 @@ class PushNotificationService
             } else {
                 $this->sendViaLegacy($token, $title, $body, $data);
             }
+
+            $this->logger->info('Push notification sent', [
+                'email' => $user->getEmail(),
+                'title' => $title,
+            ]);
         } catch (\Throwable $e) {
             $this->logger->error('Push notification failed: '.$e->getMessage(), [
                 'email' => $user->getEmail(),
