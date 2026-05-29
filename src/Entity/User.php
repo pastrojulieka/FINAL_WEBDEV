@@ -43,6 +43,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: Cart::class, cascade: ['persist','remove'])]
     private ?Cart $cart = null;
 
+    #[ORM\Column(length: 512, nullable: true)]
+    private ?string $fcmToken = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -161,6 +164,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->cart = $cart;
+
+        return $this;
+    }
+
+    public function getFcmToken(): ?string
+    {
+        return $this->fcmToken;
+    }
+
+    public function setFcmToken(?string $fcmToken): static
+    {
+        $this->fcmToken = $fcmToken;
 
         return $this;
     }

@@ -4,6 +4,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    firebase.project_id: '%env(default::FIREBASE_PROJECT_ID)%'
+    firebase.credentials_json: '%env(default::FIREBASE_CREDENTIALS_JSON)%'
+    firebase.server_key: '%env(default::FIREBASE_SERVER_KEY)%'
 
 services:
     # default configuration for services in *this* file
@@ -15,6 +18,12 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+
+    App\Service\PushNotificationService:
+        arguments:
+            $firebaseProjectId: '%firebase.project_id%'
+            $firebaseCredentialsJson: '%firebase.credentials_json%'
+            $firebaseServerKey: '%firebase.server_key%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

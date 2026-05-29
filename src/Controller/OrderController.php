@@ -7,6 +7,7 @@ use App\Entity\Order;
 use App\Form\Order1Type;
 use App\Repository\OrderRepository;
 use App\Service\ActivityLogService;
+use App\Service\PushNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,6 +19,7 @@ final class OrderController extends AbstractController
 {
     public function __construct(
         private ActivityLogService $activityLogService,
+        private PushNotificationService $pushNotificationService,
     ) {
     }
 
@@ -99,6 +101,8 @@ final class OrderController extends AbstractController
             $this->finalizeOrder($order);
             $entityManager->persist($order);
             $entityManager->flush();
+
+            $this->pushNotificationService->notifyOrderUpdated($order);
 
             $this->activityLogService->log(
                 $this->getUser(),
