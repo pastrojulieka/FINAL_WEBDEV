@@ -42,7 +42,7 @@ class ApiOrderController extends AbstractController
         return new JsonResponse([
             'success' => true,
             'data' => array_map([$this, 'serializeOrder'], $orders),
-        ]);
+        ], headers: ['Cache-Control' => 'no-store, no-cache, must-revalidate']);
     }
 
     #[Route('/orders/{id}', name: 'api_order_show', requirements: ['id' => '\d+'], methods: ['GET'])]
@@ -76,7 +76,7 @@ class ApiOrderController extends AbstractController
         return new JsonResponse([
             'success' => true,
             'data' => $this->serializeOrder($order),
-        ]);
+        ], headers: ['Cache-Control' => 'no-store, no-cache, must-revalidate']);
     }
 
     #[Route('/orders', name: 'api_create_order', methods: ['POST'])]

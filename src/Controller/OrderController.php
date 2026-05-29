@@ -65,6 +65,12 @@ final class OrderController extends AbstractController
             return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
+        }
+
         return $this->render('order/new.html.twig', [
             'order' => $order,
             'form' => $form,
@@ -91,6 +97,7 @@ final class OrderController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->finalizeOrder($order);
+            $entityManager->persist($order);
             $entityManager->flush();
 
             $this->activityLogService->log(
@@ -103,6 +110,12 @@ final class OrderController extends AbstractController
 
             $this->addFlash('success', 'Order updated successfully!');
             return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         return $this->render('order/edit.html.twig', [

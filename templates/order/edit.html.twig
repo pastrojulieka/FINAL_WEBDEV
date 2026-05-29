@@ -153,9 +153,17 @@
                         </div>
                     </div>
 
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div class="mb-4 p-4 rounded-lg {% if label == 'success' %}bg-green-100 text-green-800 border border-green-200{% else %}bg-red-100 text-red-800 border border-red-200{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+
                     <!-- Form Card -->
                     <div class="glass rounded-2xl shadow-xl border border-orange-100 p-8 mb-6">
-                        {{ form_start(form, {'attr': {'class': 'order-form'}}) }}
+                        {{ form_start(form, {'attr': {'class': 'order-form', 'data-turbo': 'false'}}) }}
                         
                         <style>
                             .order-form {
@@ -498,7 +506,7 @@
         // Auto-calculate total when quantity or price changes
         const qtyField = document.querySelector('[name="order1[quantity]"]');
         const priceField = document.querySelector('[name="order1[price]"]');
-        const totalField = document.querySelector('[name="order1[total_amount]"]');
+        const totalField = document.querySelector('[name="order1[totalAmount]"]');
 
         function recalcTotal() {
             if (!qtyField || !priceField || !totalField) return;

@@ -16,10 +16,10 @@ class Order1Type extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('customer_name', TextType::class, [
+            ->add('customerName', TextType::class, [
                 'label' => 'Customer Name',
             ])
-            ->add('product_name', TextType::class, [
+            ->add('productName', TextType::class, [
                 'label' => 'Product Name',
             ])
             ->add('material', TextType::class, [
@@ -32,28 +32,34 @@ class Order1Type extends AbstractType
             ->add('quantity', NumberType::class, [
                 'label' => 'Quantity',
                 'html5' => true,
-                'attr' => ['min' => 1],
+                'input' => 'number',
+                'attr' => ['min' => 1, 'step' => 1],
             ])
             ->add('price', NumberType::class, [
                 'label' => 'Unit Price',
                 'html5' => true,
                 'scale' => 2,
+                'input' => 'number',
                 'attr' => ['step' => '0.01', 'min' => 0],
             ])
-            ->add('total_amount', NumberType::class, [
+            ->add('totalAmount', NumberType::class, [
                 'label' => 'Total Amount',
                 'html5' => true,
                 'scale' => 2,
+                'input' => 'number',
                 'attr' => ['step' => '0.01', 'min' => 0],
             ])
             ->add('date', DateTimeType::class, [
                 'label' => 'Order Date',
                 'widget' => 'single_text',
+                'html5' => true,
                 'input' => 'datetime',
+                'with_seconds' => false,
             ])
-            ->add('delivery_date', DateType::class, [
+            ->add('deliveryDate', DateType::class, [
                 'label' => 'Delivery Date',
                 'widget' => 'single_text',
+                'html5' => true,
                 'input' => 'datetime_immutable',
             ])
         ;
