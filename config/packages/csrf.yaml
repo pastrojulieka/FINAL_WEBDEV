@@ -1,9 +1,9 @@
-# Enable stateless CSRF protection for forms and logins/logouts
+# Session-based CSRF for Symfony forms (standard POST body validation).
+# Stateless CSRF (cookie + header) is only used for login via _csrf_token field.
 framework:
     form:
         csrf_protection:
             token_id: submit
 
     csrf_protection:
-        stateless_token_ids:
-            - submit
+        stateless_token_ids: []

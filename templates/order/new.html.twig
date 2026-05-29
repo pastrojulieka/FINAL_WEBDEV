@@ -406,6 +406,7 @@
 
                         <!-- Form Actions -->
                         <div class="form-actions">
+                            {{ form_widget(form._token) }}
                             <button type="submit" class="btn-submit">
                                 <i class="fa-solid fa-check-circle"></i>
                                 <span>Create Order</span>
@@ -416,7 +417,7 @@
                             </a>
                         </div>
 
-                        {{ form_end(form) }}
+                        {{ form_end(form, {'render_rest': false}) }}
                     </div>
 
                     <!-- Back Button -->
