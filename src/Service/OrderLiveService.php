@@ -24,8 +24,9 @@ class OrderLiveService
         $parts = [];
         foreach ($orders as $order) {
             $parts[] = sprintf(
-                '%d:%s:%s:%s',
+                '%d:%s:%s:%s:%s',
                 $order->getId(),
+                $order->getStatus(),
                 $order->getTotalAmount(),
                 $order->getQuantity(),
                 $order->getDate()?->format('Y-m-d H:i:s') ?? ''
@@ -64,6 +65,7 @@ class OrderLiveService
             'total_amount' => $order->getTotalAmount(),
             'date' => $order->getDate()?->format('Y-m-d H:i:s'),
             'delivery_date' => $order->getDeliveryDate()?->format('Y-m-d'),
+            'status' => $order->getStatus(),
         ];
     }
 }

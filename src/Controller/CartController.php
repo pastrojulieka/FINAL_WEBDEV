@@ -276,6 +276,7 @@ class CartController extends AbstractController
             $order->setTotalAmount($product->getPrice() * $quantity);
             $order->setDate(new \DateTime());
             $order->setDeliveryDate(new \DateTimeImmutable('+7 days'));
+            $order->setStatus(Order::STATUS_PENDING);
             $order->setCreatedBy($user);
 
             $product->setQuantity($product->getQuantity() - $quantity);

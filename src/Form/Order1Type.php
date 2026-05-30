@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Order;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -61,6 +62,10 @@ class Order1Type extends AbstractType
                 'widget' => 'single_text',
                 'html5' => true,
                 'input' => 'datetime_immutable',
+            ])
+            ->add('status', ChoiceType::class, [
+                'label' => 'Order Status',
+                'choices' => Order::statusChoices(),
             ])
         ;
     }

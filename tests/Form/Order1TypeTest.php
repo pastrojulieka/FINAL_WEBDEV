@@ -32,6 +32,7 @@ class Order1TypeTest extends TypeTestCase
             'totalAmount' => 450,
             'date' => '2025-01-15T10:00',
             'deliveryDate' => '2025-01-22',
+            'status' => 'complete',
         ]);
 
         $this->assertTrue($form->isSynchronized());
@@ -39,5 +40,6 @@ class Order1TypeTest extends TypeTestCase
         $this->assertSame('Jane Updated', $order->getCustomerName());
         $this->assertSame('Desk', $order->getProductName());
         $this->assertSame(450.0, $order->getTotalAmount());
+        $this->assertSame('complete', $order->getStatus());
     }
 }

@@ -41,6 +41,7 @@ final class OrderController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_STAFF');
 
         $order = new Order();
+        $order->setStatus(Order::STATUS_PENDING);
         $order->setDate(new \DateTime());
         $order->setDeliveryDate(new \DateTimeImmutable('+7 days'));
 
@@ -96,6 +97,7 @@ final class OrderController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_STAFF');
 
+        $previousStatus = $order->getStatus();
         $form = $this->createForm(Order1Type::class, $order);
         $form->handleRequest($request);
 
@@ -104,7 +106,9 @@ final class OrderController extends AbstractController
             $entityManager->persist($order);
             $entityManager->flush();
 
-            $this->notifyCustomerAboutOrderUpdate($order);
+            if ($previousStatus !== $order->getStatus()) {
+                $this->notifyCustomerAboutOrderUpdate($order, $previousStatus);
+            }
 
             $this->activityLogService->log(
                 $this->getUser(),
@@ -128,6 +132,79 @@ final class OrderController extends AbstractController
             'order' => $order,
             'form' => $form,
         ]);
+    }
+
+    #[Route('/{id}/status', name: 'app_order_status', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function updateStatus(Request $request, Order $order, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_STAFF');
+
+        $token = $request->getPayload()->getString('_token');
+        if ($token === '' && $request->request->has('_token')) {
+            $token = (string) $request->request->get('_token');
+        }
+
+        if (!$this->isCsrfTokenValid('order_status'.$order->getId(), $token)) {
+            if ($request->isXmlHttpRequest()) {
+                return $this->json(['success' => false, 'message' => 'Invalid security token'], 400);
+            }
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+
+            return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        $newStatus = $request->getPayload()->getString('status');
+        if ($newStatus === '' && $request->request->has('status')) {
+            $newStatus = (string) $request->request->get('status');
+        }
+
+        if (!Order::isValidStatus($newStatus)) {
+            if ($request->isXmlHttpRequest()) {
+                return $this->json(['success' => false, 'message' => 'Invalid order status'], 400);
+            }
+            $this->addFlash('error', 'Invalid order status.');
+
+            return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        $previousStatus = $order->getStatus();
+        if ($previousStatus === $newStatus) {
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'success' => true,
+                    'message' => 'Status unchanged',
+                    'status' => $newStatus,
+                ]);
+            }
+
+            return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        $order->setStatus($newStatus);
+        $entityManager->flush();
+
+        $this->notifyCustomerAboutOrderUpdate($order, $previousStatus);
+
+        $this->activityLogService->log(
+            $this->getUser(),
+            ActivityLog::ACTION_UPDATE,
+            'Order',
+            (string) $order->getId(),
+            sprintf('Set order #%d status to %s', $order->getId(), $newStatus)
+        );
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->json([
+                'success' => true,
+                'message' => 'Order status updated',
+                'status' => $newStatus,
+                'order_id' => $order->getId(),
+            ]);
+        }
+
+        $this->addFlash('success', sprintf('Order #%d marked as %s.', $order->getId(), ucfirst($newStatus)));
+
+        return $this->redirectToRoute('app_order_index', [], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id}/delete', name: 'app_order_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
@@ -184,7 +261,7 @@ final class OrderController extends AbstractController
         }
     }
 
-    private function notifyCustomerAboutOrderUpdate(Order $order): void
+    private function notifyCustomerAboutOrderUpdate(Order $order, ?string $previousStatus = null): void
     {
         $customer = $order->getCreatedBy();
         if ($customer === null) {
@@ -197,6 +274,6 @@ final class OrderController extends AbstractController
         }
 
         $order->setCreatedBy($freshCustomer);
-        $this->pushNotificationService->notifyOrderUpdated($order);
+        $this->pushNotificationService->notifyOrderStatusChanged($order, $previousStatus);
     }
 }

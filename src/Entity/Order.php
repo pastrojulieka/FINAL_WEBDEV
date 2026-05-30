@@ -10,6 +10,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: '`order`')]
 class Order
 {
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_COMPLETE = 'complete';
+    public const STATUS_CANCELLED = 'cancelled';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -45,6 +49,30 @@ class Order
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
     private ?User $createdBy = null;
+
+    #[ORM\Column(length: 20, options: ['default' => self::STATUS_PENDING])]
+    private string $status = self::STATUS_PENDING;
+
+    /**
+     * @return array<string, string>
+     */
+    public static function statusChoices(): array
+    {
+        return [
+            'Pending' => self::STATUS_PENDING,
+            'Complete' => self::STATUS_COMPLETE,
+            'Cancelled' => self::STATUS_CANCELLED,
+        ];
+    }
+
+    public static function isValidStatus(string $status): bool
+    {
+        return \in_array($status, [
+            self::STATUS_PENDING,
+            self::STATUS_COMPLETE,
+            self::STATUS_CANCELLED,
+        ], true);
+    }
 
     public function getId(): ?int
     {
@@ -167,6 +195,22 @@ class Order
     public function setCreatedBy(?User $createdBy): static
     {
         $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        if (!self::isValidStatus($status)) {
+            throw new \InvalidArgumentException(sprintf('Invalid order status: %s', $status));
+        }
+
+        $this->status = $status;
 
         return $this;
     }

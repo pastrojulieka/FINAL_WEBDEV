@@ -38,22 +38,42 @@ class PushNotificationService
 
     public function notifyOrderUpdated(Order $order): void
     {
+        $this->notifyOrderStatusChanged($order);
+    }
+
+    public function notifyOrderStatusChanged(Order $order, ?string $previousStatus = null): void
+    {
         $customer = $order->getCreatedBy();
         if (!$customer instanceof User) {
             return;
         }
 
-        $title = 'Order Updated';
+        $status = $order->getStatus();
+        $statusLabel = ucfirst($status);
+
+        $title = 'Order Status Updated';
         $body = sprintf(
-            'Your order #%d (%s) was updated. Delivery: %s',
+            'Your order #%d (%s) is now %s.',
             $order->getId(),
             $order->getProductName() ?? 'Product',
-            $order->getDeliveryDate()?->format('M d, Y') ?? 'TBD'
+            $statusLabel
         );
 
+        if ($previousStatus !== null && $previousStatus !== $status) {
+            $body = sprintf(
+                'Your order #%d (%s) changed from %s to %s.',
+                $order->getId(),
+                $order->getProductName() ?? 'Product',
+                ucfirst($previousStatus),
+                $statusLabel
+            );
+        }
+
         $this->sendToUser($customer, $title, $body, [
-            'type' => 'order_updated',
+            'type' => 'order_status_changed',
             'orderId' => (string) $order->getId(),
+            'status' => $status,
+            'previousStatus' => $previousStatus ?? '',
         ]);
     }
 

@@ -440,6 +440,48 @@
         document.getElementById('emptyState')?.classList.add('hidden');
       }
     }, {{ orders|length }});
+
+    function statusPillClasses(status) {
+      if (status === 'complete') return 'order-status-pill text-xs font-semibold px-2.5 py-1 rounded-full bg-green-100 text-green-800';
+      if (status === 'cancelled') return 'order-status-pill text-xs font-semibold px-2.5 py-1 rounded-full bg-red-100 text-red-800';
+      return 'order-status-pill text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800';
+    }
+
+    document.getElementById('orderGrid')?.addEventListener('change', async function (event) {
+      const select = event.target.closest('.order-status-select');
+      if (!select) return;
+
+      const form = select.closest('form');
+      if (!form) return;
+
+      const card = form.closest('.order-card');
+      const statusPill = card?.querySelector('[data-status-pill]');
+      const previousValue = card?.dataset.status || select.value;
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'same-origin',
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.success) {
+          select.value = previousValue;
+          alert(payload.message || 'Could not update order status.');
+          return;
+        }
+
+        if (card) card.dataset.status = select.value;
+        if (statusPill) {
+          statusPill.textContent = select.value.charAt(0).toUpperCase() + select.value.slice(1);
+          statusPill.className = statusPillClasses(select.value);
+        }
+      } catch (error) {
+        select.value = previousValue;
+        console.error('Status update failed:', error);
+      }
+    });
   </script>
 </body>
 {% endblock %}

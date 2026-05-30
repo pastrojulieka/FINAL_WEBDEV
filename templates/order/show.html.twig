@@ -158,6 +158,8 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
                                     <h2 class="text-3xl font-bold text-gray-800">Order #{{ order.id }}</h2>
+                                    {% set statusClass = order.status == 'complete' ? 'bg-green-100 text-green-800' : (order.status == 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800') %}
+                                    <span class="inline-block mt-2 text-sm font-semibold px-3 py-1 rounded-full {{ statusClass }}">{{ order.status|capitalize }}</span>
                                     <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Active</span>
                                 </div>
                                 <div class="flex flex-wrap gap-4 text-sm text-gray-600">
