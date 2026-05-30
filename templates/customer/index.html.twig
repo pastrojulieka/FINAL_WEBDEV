@@ -449,5 +449,16 @@
             });
         }
     </script>
+    {% include 'includes/_live_poll.html.twig' %}
+    <script>
+      LiveResource.start('{{ path('app_live_customers') }}', '#customerGrid', {
+        initialCount: {{ customers|length }},
+        onUpdate: (data) => {
+          const el = document.getElementById('customerCount');
+          if (el && data.count !== undefined) el.textContent = data.count;
+        },
+        toastTitle: 'Customers updated',
+      });
+    </script>
 </body>
 {% endblock %}

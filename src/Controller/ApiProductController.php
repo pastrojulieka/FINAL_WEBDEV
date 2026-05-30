@@ -3,16 +3,34 @@
 namespace App\Controller;
 
 use App\Repository\ProductRepository;
+use App\Service\LiveSnapshotService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api')]
 class ApiProductController extends AbstractController
 {
+    public function __construct(
+        private LiveSnapshotService $liveSnapshot,
+    ) {
+    }
+
     #[Route('/products', name: 'api_products', methods: ['GET'])]
-    public function getProducts(ProductRepository $productRepository): JsonResponse
+    public function getProducts(Request $request, ProductRepository $productRepository): JsonResponse
     {
+        $version = $this->liveSnapshot->fingerprintProducts();
+        $clientVersion = $request->query->getString('version');
+
+        if ($clientVersion !== '' && $clientVersion === $version) {
+            return new JsonResponse([
+                'success' => true,
+                'changed' => false,
+                'version' => $version,
+            ], headers: ['Cache-Control' => 'no-store']);
+        }
+
         $products = $productRepository->findAll();
         $productData = [];
         
@@ -40,8 +58,10 @@ class ApiProductController extends AbstractController
         
         return new JsonResponse([
             'success' => true,
-            'data' => $productData
-        ]);
+            'changed' => true,
+            'version' => $version,
+            'data' => $productData,
+        ], headers: ['Cache-Control' => 'no-store']);
     }
 
     #[Route('/products/{id}', name: 'api_product_show', methods: ['GET'])]

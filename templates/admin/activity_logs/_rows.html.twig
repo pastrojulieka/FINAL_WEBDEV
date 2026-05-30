@@ -1,0 +1,28 @@
+{% for log in logs %}
+<tr class="hover:bg-orange-50/80 transition-colors">
+  <td class="px-4 py-3 whitespace-nowrap text-gray-700 font-mono text-xs">{{ log.createdAt|date('Y-m-d H:i:s') }}</td>
+  <td class="px-4 py-3 text-gray-800 font-medium">{{ log.userEmail }}</td>
+  <td class="px-4 py-3"><span class="inline-flex px-2 py-0.5 rounded-md bg-gray-100 text-gray-800 text-xs font-semibold">{{ log.role }}</span></td>
+  <td class="px-4 py-3">
+    {% set a = log.action %}
+    {% if a == 'LOGIN' %}
+      <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-green-100 text-green-800 text-xs font-semibold"><i class="fa-solid fa-right-to-bracket"></i> LOGIN</span>
+    {% elseif a == 'LOGOUT' %}
+      <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 text-slate-800 text-xs font-semibold"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</span>
+    {% elseif a == 'CREATE' %}
+      <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-100 text-blue-800 text-xs font-semibold"><i class="fa-solid fa-plus"></i> CREATE</span>
+    {% elseif a == 'UPDATE' %}
+      <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-100 text-amber-900 text-xs font-semibold"><i class="fa-solid fa-pen"></i> UPDATE</span>
+    {% elseif a == 'DELETE' %}
+      <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-100 text-red-800 text-xs font-semibold"><i class="fa-solid fa-trash"></i> DELETE</span>
+    {% else %}
+      <span class="text-xs font-semibold">{{ a }}</span>
+    {% endif %}
+  </td>
+  <td class="px-4 py-3 text-gray-700">
+    {% if log.subject %}
+      <span class="font-semibold">{{ log.subject }}</span>{% if log.subjectId %} <span class="text-gray-500">#{{ log.subjectId }}</span>{% endif %}
+    {% else %}<span class="text-gray-400">—</span>{% endif %}
+  </td>
+</tr>
+{% endfor %}

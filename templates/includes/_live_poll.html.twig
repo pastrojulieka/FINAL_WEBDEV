@@ -4,8 +4,8 @@
       <i class="fa-solid fa-bell text-orange-600"></i>
     </div>
     <div>
-      <p class="font-semibold text-gray-800 text-sm" id="liveOrderToastTitle">New order received</p>
-      <p class="text-xs text-gray-500" id="liveOrderToastMessage">Orders list updated</p>
+      <p class="font-semibold text-gray-800 text-sm" id="liveOrderToastTitle">Update</p>
+      <p class="text-xs text-gray-500" id="liveOrderToastMessage">Data refreshed automatically</p>
     </div>
   </div>
 </div>
@@ -20,61 +20,88 @@
     document.getElementById('liveOrderToastTitle').textContent = title;
     document.getElementById('liveOrderToastMessage').textContent = message;
     toast.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      toast.classList.remove('translate-x-full', 'opacity-0');
-    });
+    requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
     setTimeout(() => {
       toast.classList.add('translate-x-full', 'opacity-0');
       setTimeout(() => toast.classList.add('hidden'), 300);
     }, 4500);
   }
 
-  window.LiveOrders = {
+  async function fetchLive(url, version) {
+    const sep = url.includes('?') ? '&' : '?';
+    const fullUrl = version ? `${url}${sep}version=${encodeURIComponent(version)}` : url;
+    const res = await fetch(fullUrl, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin',
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.success ? data : null;
+  }
+
+  window.LiveResource = {
     pollUrl: null,
     version: '',
     count: 0,
+    targetSelector: null,
     onUpdate: null,
+    toastTitle: 'Updated',
 
     async poll() {
       if (!this.pollUrl) return;
       try {
-        const url = this.version
-          ? `${this.pollUrl}?version=${encodeURIComponent(this.version)}`
-          : this.pollUrl;
-        const res = await fetch(url, {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-          credentials: 'same-origin',
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!data.success) return;
+        const data = await fetchLive(this.pollUrl, this.version);
+        if (!data) return;
 
         if (data.changed) {
+          const prev = this.version;
           const prevCount = this.count;
           this.version = data.version;
           this.count = data.count ?? this.count;
+
+          if (this.targetSelector && data.html) {
+            const el = document.querySelector(this.targetSelector);
+            if (el) el.innerHTML = data.html;
+          }
           if (typeof this.onUpdate === 'function') {
             this.onUpdate(data, prevCount);
           }
-          if (prevCount > 0 && data.count > prevCount) {
-            showToast('New order received', `${data.count - prevCount} new order(s) added`);
-          } else if (prevCount > 0 && data.changed) {
-            showToast('Orders updated', 'Order list refreshed automatically');
+          if (prev && prev !== data.version) {
+            showToast(this.toastTitle, this.toastMessage || 'List refreshed automatically');
           }
         } else if (data.version) {
           this.version = data.version;
         }
       } catch (e) {
-        console.debug('Live order poll skipped:', e);
+        console.debug('LiveResource poll skipped:', e);
       }
     },
 
-    start(pollUrl, onUpdate, initialCount) {
+    start(pollUrl, targetSelector, options) {
+      options = options || {};
       this.pollUrl = pollUrl;
-      this.onUpdate = onUpdate;
-      this.count = initialCount ?? 0;
+      this.targetSelector = targetSelector;
+      this.onUpdate = options.onUpdate || null;
+      this.count = options.initialCount ?? 0;
+      this.toastTitle = options.toastTitle || 'Updated';
+      this.toastMessage = options.toastMessage || 'Data refreshed automatically';
       this.poll();
       setInterval(() => this.poll(), POLL_MS);
+    },
+  };
+
+  window.LiveOrders = {
+    start(pollUrl, onUpdate, initialCount) {
+      LiveResource.start(pollUrl, '#orderGrid', {
+        initialCount,
+        onUpdate: (data, prevCount) => {
+          const countEl = document.getElementById('orderCount');
+          if (countEl && data.count !== undefined) countEl.textContent = data.count;
+          if (typeof onUpdate === 'function') onUpdate(data, prevCount);
+        },
+        toastTitle: 'New order received',
+        toastMessage: 'Orders list updated',
+      });
     },
   };
 
@@ -85,52 +112,47 @@
     async poll() {
       if (!this.pollUrl) return;
       try {
-        const url = this.version
-          ? `${this.pollUrl}?version=${encodeURIComponent(this.version)}`
-          : this.pollUrl;
-        const res = await fetch(url, {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-          credentials: 'same-origin',
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!data.success) return;
+        const data = await fetchLive(this.pollUrl, this.version);
+        if (!data) return;
 
         if (data.changed) {
-          const prevVersion = this.version;
+          const prev = this.version;
           this.version = data.version;
 
           if (data.stats) {
-            const revenueEl = document.getElementById('liveTotalRevenue');
-            const revenueDescEl = document.getElementById('liveRevenueDesc');
-            const ordersEl = document.getElementById('liveTotalOrders');
-            const ordersDescEl = document.getElementById('liveOrdersDesc');
-            const myOrdersEl = document.getElementById('liveMyOrders');
-            const allOrdersEl = document.getElementById('liveAllOrders');
-
-            if (revenueEl && data.stats.totalRevenue) revenueEl.textContent = data.stats.totalRevenue;
-            if (revenueDescEl && data.stats.revenueDesc) revenueDescEl.textContent = data.stats.revenueDesc;
-            if (ordersEl && data.stats.totalOrders) ordersEl.textContent = data.stats.totalOrders;
-            if (ordersDescEl && data.stats.ordersDesc) ordersDescEl.textContent = data.stats.ordersDesc;
-            if (myOrdersEl && data.stats.myOrders) myOrdersEl.textContent = data.stats.myOrders;
-            if (allOrdersEl && data.stats.totalOrders) allOrdersEl.textContent = data.stats.totalOrders;
+            const map = {
+              totalRevenue: 'liveTotalRevenue',
+              revenueDesc: 'liveRevenueDesc',
+              totalOrders: 'liveTotalOrders',
+              ordersDesc: 'liveOrdersDesc',
+              totalCustomers: 'liveTotalCustomers',
+              totalProducts: 'liveTotalProducts',
+              totalStock: 'liveTotalStock',
+              myOrders: 'liveMyOrders',
+              myProducts: 'liveMyProducts',
+              myStock: 'liveMyStock',
+              myCustomers: 'liveMyCustomers',
+              totalRecords: 'liveTotalRecords',
+            };
+            Object.keys(map).forEach((key) => {
+              if (data.stats[key]) {
+                const el = document.getElementById(map[key]);
+                if (el) el.textContent = data.stats[key];
+              }
+            });
           }
 
           if (data.activitiesHtml) {
-            const container = document.getElementById('liveActivities');
-            if (container) {
-              container.innerHTML = data.activitiesHtml;
-            }
+            const c = document.getElementById('liveActivities');
+            if (c) c.innerHTML = data.activitiesHtml;
           }
 
-          if (prevVersion) {
-            showToast('Dashboard updated', 'New activity detected');
-          }
+          if (prev) showToast('Dashboard updated', 'Stats and activity refreshed');
         } else if (data.version) {
           this.version = data.version;
         }
       } catch (e) {
-        console.debug('Live dashboard poll skipped:', e);
+        console.debug('LiveDashboard poll skipped:', e);
       }
     },
 

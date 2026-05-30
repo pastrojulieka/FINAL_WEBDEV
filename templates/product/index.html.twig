@@ -472,5 +472,16 @@
       });
     }
   </script>
+  {% include 'includes/_live_poll.html.twig' %}
+  <script>
+    LiveResource.start('{{ path('app_live_products') }}', '#productGrid', {
+      initialCount: {{ products|length }},
+      onUpdate: (data) => {
+        const el = document.getElementById('productCount');
+        if (el && data.count !== undefined) el.textContent = data.count;
+      },
+      toastTitle: 'Products updated',
+    });
+  </script>
 </body>
 {% endblock %}

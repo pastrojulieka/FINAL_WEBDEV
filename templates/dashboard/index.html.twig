@@ -167,7 +167,7 @@
                 </div>
               </div>
               
-              <div class="mt-3 text-3xl font-extrabold font-montserrat"{% if stat.label == 'Total Revenue' %} id="liveTotalRevenue"{% elseif stat.label == 'Total Orders' %} id="liveTotalOrders"{% endif %}>{{ stat.value }}</div>
+              <div class="mt-3 text-3xl font-extrabold font-montserrat"{% if stat.label == 'Total Revenue' %} id="liveTotalRevenue"{% elseif stat.label == 'Total Orders' %} id="liveTotalOrders"{% elseif stat.label == 'Total Customers' %} id="liveTotalCustomers"{% elseif stat.label == 'Total Products' %} id="liveTotalProducts"{% elseif stat.label == 'Stock' %} id="liveTotalStock"{% elseif stat.label == 'My Orders' %} id="liveMyOrders"{% endif %}>{{ stat.value }}</div>
               
               <div class="flex items-center gap-2 mt-3">
                 {% if stat.trend == 'up' %}

@@ -146,7 +146,7 @@
                 </div>
               </div>
               
-              <div class="mt-3 text-3xl font-extrabold font-montserrat"{% if stat.label == 'My Orders' %} id="liveMyOrders"{% endif %}>{{ stat.value }}</div>
+              <div class="mt-3 text-3xl font-extrabold font-montserrat"{% if stat.label == 'My Products' %} id="liveMyProducts"{% elseif stat.label == 'My Orders' %} id="liveMyOrders"{% elseif stat.label == 'My Stock' %} id="liveMyStock"{% elseif stat.label == 'My Customers' %} id="liveMyCustomers"{% elseif stat.label == 'Total Records' %} id="liveTotalRecords"{% endif %}>{{ stat.value }}</div>
               
               <div class="flex items-center gap-2 mt-3">
                 <span class="flex items-center gap-1 text-xs bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm font-lato">

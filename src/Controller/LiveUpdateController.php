@@ -2,10 +2,13 @@
 
 namespace App\Controller;
 
+use App\Repository\ActivityLogRepository;
 use App\Repository\CustomerRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
-use App\Service\OrderLiveService;
+use App\Repository\StockRepository;
+use App\Repository\UserRepository;
+use App\Service\LiveSnapshotService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class LiveUpdateController extends AbstractController
 {
     public function __construct(
-        private OrderLiveService $orderLiveService,
+        private LiveSnapshotService $liveSnapshot,
     ) {
     }
 
@@ -24,52 +27,37 @@ final class LiveUpdateController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_STAFF');
 
-        $orders = $this->orderLiveService->getAllOrdersSorted();
-        $version = $this->orderLiveService->computeFingerprint($orders);
-        $clientVersion = $request->query->getString('version');
-
-        if ($clientVersion !== '' && $clientVersion === $version) {
-            return new JsonResponse([
-                'success' => true,
-                'changed' => false,
-                'version' => $version,
-                'count' => \count($orders),
-            ]);
+        $version = $this->liveSnapshot->fingerprintOrders();
+        if ($this->isUnchanged($request, $version)) {
+            return $this->unchanged($version, ['count' => \count($this->liveSnapshot->getAllOrdersSorted())]);
         }
 
-        $html = $this->renderView('order/_cards.html.twig', [
-            'orders' => $orders,
-        ]);
+        $orders = $this->liveSnapshot->getAllOrdersSorted();
 
         return new JsonResponse([
             'success' => true,
             'changed' => true,
             'version' => $version,
             'count' => \count($orders),
-            'html' => $html,
-            'orders' => $this->orderLiveService->serializeOrders($orders),
+            'html' => $this->renderView('order/_cards.html.twig', ['orders' => $orders]),
+            'orders' => $this->liveSnapshot->serializeOrders($orders),
         ]);
     }
 
     #[Route('/dashboard', name: 'app_live_dashboard', methods: ['GET'])]
-    public function dashboard(
-        Request $request,
-        OrderRepository $orderRepository,
-        CustomerRepository $customerRepository,
-        ProductRepository $productRepository,
-    ): JsonResponse {
+    public function dashboard(Request $request, OrderRepository $orderRepository): JsonResponse
+    {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
+        $version = $this->liveSnapshot->fingerprintDashboard();
+        if ($this->isUnchanged($request, $version)) {
+            return $this->unchanged($version);
+        }
+
+        $counts = $this->liveSnapshot->getDashboardCounts();
         $now = new \DateTime();
         $lastWeek = (clone $now)->modify('-7 days');
         $twoWeeksAgo = (clone $now)->modify('-14 days');
-
-        $currentWeekRevenue = (float) ($orderRepository->createQueryBuilder('o')
-            ->select('SUM(o.total_amount)')
-            ->where('o.date >= :lastWeek')
-            ->setParameter('lastWeek', $lastWeek)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0);
 
         $previousWeekRevenue = (float) ($orderRepository->createQueryBuilder('o')
             ->select('SUM(o.total_amount)')
@@ -80,17 +68,6 @@ final class LiveUpdateController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult() ?? 1);
 
-        $revenueChange = $previousWeekRevenue > 0
-            ? (($currentWeekRevenue - $previousWeekRevenue) / $previousWeekRevenue) * 100
-            : 0;
-
-        $currentWeekOrders = (int) ($orderRepository->createQueryBuilder('o')
-            ->select('COUNT(o.id)')
-            ->where('o.date >= :lastWeek')
-            ->setParameter('lastWeek', $lastWeek)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0);
-
         $previousWeekOrders = (int) ($orderRepository->createQueryBuilder('o')
             ->select('COUNT(o.id)')
             ->where('o.date >= :twoWeeks')
@@ -100,38 +77,29 @@ final class LiveUpdateController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult() ?? 1);
 
-        $ordersChange = $previousWeekOrders > 0
-            ? (($currentWeekOrders - $previousWeekOrders) / $previousWeekOrders) * 100
+        $revenueChange = $previousWeekRevenue > 0
+            ? (($counts['revenue'] - $previousWeekRevenue) / $previousWeekRevenue) * 100
             : 0;
-
-        $activities = $this->buildRecentActivities($orderRepository, $customerRepository, $productRepository);
-        $orders = $this->orderLiveService->getAllOrdersSorted();
-        $version = hash('sha256', $this->orderLiveService->computeFingerprint($orders).$currentWeekOrders.$currentWeekRevenue);
-
-        $clientVersion = $request->query->getString('version');
-        if ($clientVersion !== '' && $clientVersion === $version) {
-            return new JsonResponse([
-                'success' => true,
-                'changed' => false,
-                'version' => $version,
-            ]);
-        }
-
-        $activitiesHtml = $this->renderView('live/_activities.html.twig', [
-            'activities' => $activities,
-        ]);
+        $ordersChange = $previousWeekOrders > 0
+            ? (($counts['orders'] - $previousWeekOrders) / $previousWeekOrders) * 100
+            : 0;
 
         return new JsonResponse([
             'success' => true,
             'changed' => true,
             'version' => $version,
             'stats' => [
-                'totalRevenue' => '₱'.number_format($currentWeekRevenue, 2),
+                'totalRevenue' => '₱'.number_format($counts['revenue'], 2),
                 'revenueDesc' => sprintf('%+.1f%% vs last week', $revenueChange),
-                'totalOrders' => number_format($currentWeekOrders),
+                'totalOrders' => number_format($counts['orders']),
                 'ordersDesc' => sprintf('%+.1f%% vs last week', $ordersChange),
+                'totalCustomers' => number_format($counts['customers']),
+                'totalProducts' => number_format($counts['products']),
+                'totalStock' => number_format($counts['stock']),
             ],
-            'activitiesHtml' => $activitiesHtml,
+            'activitiesHtml' => $this->renderView('live/_activities.html.twig', [
+                'activities' => $this->liveSnapshot->buildActivityFeed(8),
+            ]),
         ]);
     }
 
@@ -139,12 +107,21 @@ final class LiveUpdateController extends AbstractController
     public function staffDashboard(
         Request $request,
         OrderRepository $orderRepository,
-        CustomerRepository $customerRepository,
         ProductRepository $productRepository,
+        StockRepository $stockRepository,
+        CustomerRepository $customerRepository,
     ): JsonResponse {
         $this->denyAccessUnlessGranted('ROLE_STAFF');
 
         $user = $this->getUser();
+
+        $myProductsCount = (int) $productRepository->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->where('p.createdBy = :user OR p.createdBy IS NULL')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+
         $myOrdersCount = (int) $orderRepository->createQueryBuilder('o')
             ->select('COUNT(o.id)')
             ->where('o.createdBy = :user OR o.createdBy IS NULL')
@@ -152,118 +129,158 @@ final class LiveUpdateController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-        $totalOrders = (int) $orderRepository->createQueryBuilder('o')
-            ->select('COUNT(o.id)')
+        $myStocksCount = (int) $stockRepository->createQueryBuilder('s')
+            ->select('COUNT(s.id)')
+            ->where('s.createdBy = :user OR s.createdBy IS NULL')
+            ->setParameter('user', $user)
             ->getQuery()
             ->getSingleScalarResult();
 
-        $activities = $this->buildRecentActivities($orderRepository, $customerRepository, $productRepository);
-        $orders = $this->orderLiveService->getAllOrdersSorted();
-        $version = hash('sha256', $this->orderLiveService->computeFingerprint($orders).$myOrdersCount.$totalOrders);
+        $myCustomersCount = (int) $customerRepository->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->where('c.createdBy = :user OR c.createdBy IS NULL')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
 
-        $clientVersion = $request->query->getString('version');
-        if ($clientVersion !== '' && $clientVersion === $version) {
-            return new JsonResponse([
-                'success' => true,
-                'changed' => false,
-                'version' => $version,
-            ]);
+        $totalRecords = (int) $productRepository->createQueryBuilder('p')->select('COUNT(p.id)')->getQuery()->getSingleScalarResult()
+            + (int) $orderRepository->createQueryBuilder('o')->select('COUNT(o.id)')->getQuery()->getSingleScalarResult()
+            + (int) $stockRepository->createQueryBuilder('s')->select('COUNT(s.id)')->getQuery()->getSingleScalarResult()
+            + (int) $customerRepository->createQueryBuilder('c')->select('COUNT(c.id)')->getQuery()->getSingleScalarResult();
+
+        $version = hash('sha256', implode('|', [
+            $this->liveSnapshot->fingerprintDashboard(),
+            $myProductsCount,
+            $myOrdersCount,
+            $myStocksCount,
+            $myCustomersCount,
+            $totalRecords,
+        ]));
+
+        if ($this->isUnchanged($request, $version)) {
+            return $this->unchanged($version);
         }
-
-        $activitiesHtml = $this->renderView('live/_activities.html.twig', [
-            'activities' => $activities,
-        ]);
 
         return new JsonResponse([
             'success' => true,
             'changed' => true,
             'version' => $version,
             'stats' => [
+                'myProducts' => number_format($myProductsCount),
                 'myOrders' => number_format($myOrdersCount),
-                'totalOrders' => number_format($totalOrders),
+                'myStock' => number_format($myStocksCount),
+                'myCustomers' => number_format($myCustomersCount),
+                'totalRecords' => number_format($totalRecords),
             ],
-            'activitiesHtml' => $activitiesHtml,
+            'activitiesHtml' => $this->renderView('live/_activities.html.twig', [
+                'activities' => $this->liveSnapshot->buildActivityFeed(8),
+            ]),
         ]);
     }
 
-    private function buildRecentActivities(
-        OrderRepository $orderRepository,
-        CustomerRepository $customerRepository,
-        ProductRepository $productRepository,
-    ): array {
-        $activities = [];
-        $oneWeekAgo = (new \DateTime())->modify('-7 days');
+    #[Route('/products', name: 'app_live_products', methods: ['GET'])]
+    public function products(Request $request, ProductRepository $productRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_STAFF');
 
-        $recentOrders = $orderRepository->createQueryBuilder('o')
-            ->where('o.date >= :oneWeekAgo')
-            ->setParameter('oneWeekAgo', $oneWeekAgo)
-            ->orderBy('o.date', 'DESC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult();
+        $version = $this->liveSnapshot->fingerprintProducts();
+        $productsWithStatus = $this->liveSnapshot->getProductsWithStatus();
 
-        foreach ($recentOrders as $order) {
-            $activities[] = [
-                'icon' => 'fa-shopping-cart',
-                'title' => 'Order received',
-                'desc' => sprintf(
-                    'Order #%d - %s from %s',
-                    $order->getId(),
-                    $order->getProductName(),
-                    $order->getCustomerName()
-                ),
-                'time' => $this->timeAgo($order->getDate()),
-            ];
+        if ($this->isUnchanged($request, $version)) {
+            return $this->unchanged($version, ['count' => \count($productsWithStatus)]);
         }
 
-        $recentCustomers = $customerRepository->createQueryBuilder('c')
-            ->orderBy('c.id', 'DESC')
-            ->setMaxResults(5)
-            ->getQuery()
-            ->getResult();
-
-        foreach ($recentCustomers as $customer) {
-            $activities[] = [
-                'icon' => 'fa-user-plus',
-                'title' => 'New customer registered',
-                'desc' => sprintf('%s joined the platform', $customer->getName()),
-                'time' => 'Recently added',
-            ];
-        }
-
-        $recentProducts = $productRepository->createQueryBuilder('p')
-            ->orderBy('p.id', 'DESC')
-            ->setMaxResults(5)
-            ->getQuery()
-            ->getResult();
-
-        foreach ($recentProducts as $product) {
-            $activities[] = [
-                'icon' => 'fa-box',
-                'title' => 'New product added',
-                'desc' => sprintf('%s - %s', $product->getName(), $product->getMaterial()),
-                'time' => 'Recently added',
-            ];
-        }
-
-        return \array_slice($activities, 0, 8);
+        return new JsonResponse([
+            'success' => true,
+            'changed' => true,
+            'version' => $version,
+            'count' => \count($productsWithStatus),
+            'html' => $this->renderView('product/_grid_inner.html.twig', [
+                'productsWithStatus' => $productsWithStatus,
+            ]),
+        ]);
     }
 
-    private function timeAgo(\DateTime $datetime): string
+    #[Route('/customers', name: 'app_live_customers', methods: ['GET'])]
+    public function customers(Request $request, CustomerRepository $customerRepository): JsonResponse
     {
-        $now = new \DateTime();
-        $diff = $now->diff($datetime);
+        $this->denyAccessUnlessGranted('ROLE_STAFF');
 
-        if ($diff->d > 0) {
-            return $diff->d.' day'.($diff->d > 1 ? 's' : '').' ago';
-        }
-        if ($diff->h > 0) {
-            return $diff->h.' hour'.($diff->h > 1 ? 's' : '').' ago';
-        }
-        if ($diff->i > 0) {
-            return $diff->i.' minute'.($diff->i > 1 ? 's' : '').' ago';
+        $version = $this->liveSnapshot->fingerprintCustomers();
+        $customers = $customerRepository->findAll();
+
+        if ($this->isUnchanged($request, $version)) {
+            return $this->unchanged($version, ['count' => \count($customers)]);
         }
 
-        return 'just now';
+        return new JsonResponse([
+            'success' => true,
+            'changed' => true,
+            'version' => $version,
+            'count' => \count($customers),
+            'html' => $this->renderView('customer/_grid_inner.html.twig', ['customers' => $customers]),
+        ]);
+    }
+
+    #[Route('/users', name: 'app_live_users', methods: ['GET'])]
+    public function users(Request $request, UserRepository $userRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $version = $this->liveSnapshot->fingerprintUsers();
+        $users = $userRepository->findBy([], ['id' => 'DESC'], 500);
+
+        if ($this->isUnchanged($request, $version)) {
+            return $this->unchanged($version, ['count' => \count($users)]);
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'changed' => true,
+            'version' => $version,
+            'count' => \count($users),
+            'html' => $this->renderView('admin/users/_table_body.html.twig', ['users' => $users]),
+        ]);
+    }
+
+    #[Route('/activity-logs', name: 'app_live_activity_logs', methods: ['GET'])]
+    public function activityLogs(Request $request, ActivityLogRepository $activityLogRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $search = $request->query->getString('search');
+        $logs = $search !== ''
+            ? $activityLogRepository->searchLogs($search, 500)
+            : $activityLogRepository->findRecent(500);
+
+        $version = $this->liveSnapshot->fingerprintActivityLogs();
+
+        if ($this->isUnchanged($request, $version)) {
+            return $this->unchanged($version, ['count' => \count($logs)]);
+        }
+
+        return new JsonResponse([
+            'success' => true,
+            'changed' => true,
+            'version' => $version,
+            'count' => \count($logs),
+            'html' => $this->renderView('admin/activity_logs/_rows.html.twig', ['logs' => $logs]),
+        ]);
+    }
+
+    private function isUnchanged(Request $request, string $version): bool
+    {
+        $clientVersion = $request->query->getString('version');
+
+        return $clientVersion !== '' && $clientVersion === $version;
+    }
+
+    private function unchanged(string $version, array $extra = []): JsonResponse
+    {
+        return new JsonResponse(array_merge([
+            'success' => true,
+            'changed' => false,
+            'version' => $version,
+        ], $extra));
     }
 }

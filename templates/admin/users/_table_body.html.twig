@@ -1,0 +1,29 @@
+{% for user in users %}
+<tr class="hover:bg-orange-50 transition-colors">
+  <td class="px-6 py-4 text-sm text-gray-700 font-medium">#{{ user.id }}</td>
+  <td class="px-6 py-4 text-sm text-gray-800 font-medium">{{ user.email }}</td>
+  <td class="px-6 py-4">
+    {% set roles = user.roles %}
+    {% if 'ROLE_ADMIN' in roles %}
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800"><i class="fa-solid fa-shield-halved mr-1"></i> Admin</span>
+    {% elseif 'ROLE_STAFF' in roles %}
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800"><i class="fa-solid fa-user-tie mr-1"></i> Staff</span>
+    {% else %}
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800"><i class="fa-solid fa-user mr-1"></i> User</span>
+    {% endif %}
+  </td>
+  <td class="px-6 py-4">
+    <div class="flex items-center justify-center gap-2">
+      <a href="{{ path('app_admin_users_edit', {'id': user.id}) }}" class="px-3 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-sm font-medium shadow-sm"><i class="fa-solid fa-pen mr-1"></i> Edit</a>
+      {% if user.id != app.user.id %}
+      <form method="post" action="{{ path('app_admin_users_delete', {'id': user.id}) }}" onsubmit="return confirm('Are you sure you want to delete this user?');" class="inline">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+        <button type="submit" class="px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm font-medium shadow-sm"><i class="fa-solid fa-trash mr-1"></i> Delete</button>
+      </form>
+      {% else %}
+      <span class="px-3 py-1.5 bg-gray-300 text-gray-600 rounded-lg text-sm font-medium cursor-not-allowed"><i class="fa-solid fa-ban mr-1"></i> Current User</span>
+      {% endif %}
+    </div>
+  </td>
+</tr>
+{% endfor %}

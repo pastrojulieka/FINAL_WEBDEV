@@ -6,6 +6,7 @@ use App\Repository\OrderRepository;
 use App\Repository\CustomerRepository;
 use App\Repository\ProductRepository;
 use App\Repository\StockRepository;
+use App\Service\LiveSnapshotService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,6 +14,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 final class DashboardController extends AbstractController
 {
+    public function __construct(
+        private LiveSnapshotService $liveSnapshot,
+    ) {
+    }
+
     #[Route('/dashboard', name: 'app_dashboard')]
     public function index(
         OrderRepository $orderRepository,
@@ -89,12 +95,8 @@ final class DashboardController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult() ?? 0);
 
-        // Get recent activities from all sources
-        $activities = $this->getRecentActivities(
-            $orderRepository,
-            $customerRepository,
-            $productRepository
-        );
+        // Recent activity from ActivityLog + fallback orders
+        $activities = $this->liveSnapshot->buildActivityFeed(8);
 
         // Prepare stats array
         $stats = [
