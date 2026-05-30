@@ -59,23 +59,15 @@ final class LiveUpdateController extends AbstractController
         $lastWeek = (clone $now)->modify('-7 days');
         $twoWeeksAgo = (clone $now)->modify('-14 days');
 
-        $previousWeekRevenue = (float) ($orderRepository->createQueryBuilder('o')
-            ->select('SUM(o.total_amount)')
-            ->where('o.date >= :twoWeeks')
-            ->andWhere('o.date < :lastWeek')
-            ->setParameter('twoWeeks', $twoWeeksAgo)
-            ->setParameter('lastWeek', $lastWeek)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 1);
+        $previousWeekRevenue = $orderRepository->sumCompletedRevenueBetween($twoWeeksAgo, $lastWeek);
+        if ($previousWeekRevenue <= 0) {
+            $previousWeekRevenue = 1;
+        }
 
-        $previousWeekOrders = (int) ($orderRepository->createQueryBuilder('o')
-            ->select('COUNT(o.id)')
-            ->where('o.date >= :twoWeeks')
-            ->andWhere('o.date < :lastWeek')
-            ->setParameter('twoWeeks', $twoWeeksAgo)
-            ->setParameter('lastWeek', $lastWeek)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 1);
+        $previousWeekOrders = $orderRepository->countOrdersBetween($twoWeeksAgo, $lastWeek);
+        if ($previousWeekOrders <= 0) {
+            $previousWeekOrders = 1;
+        }
 
         $revenueChange = $previousWeekRevenue > 0
             ? (($counts['revenue'] - $previousWeekRevenue) / $previousWeekRevenue) * 100
@@ -90,7 +82,7 @@ final class LiveUpdateController extends AbstractController
             'version' => $version,
             'stats' => [
                 'totalRevenue' => '₱'.number_format($counts['revenue'], 2),
-                'revenueDesc' => sprintf('%+.1f%% vs last week', $revenueChange),
+                'revenueDesc' => sprintf('%+.1f%% vs last week · completed', $revenueChange),
                 'totalOrders' => number_format($counts['orders']),
                 'ordersDesc' => sprintf('%+.1f%% vs last week', $ordersChange),
                 'totalCustomers' => number_format($counts['customers']),

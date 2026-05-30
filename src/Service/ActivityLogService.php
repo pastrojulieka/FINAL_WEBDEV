@@ -4,13 +4,17 @@ namespace App\Service;
 
 use App\Entity\ActivityLog;
 use App\Entity\User;
+use App\Repository\ActivityLogRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class ActivityLogService
 {
+    private const AUTH_DEDUP_SECONDS = 120;
+
     public function __construct(
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private ActivityLogRepository $activityLogRepository,
     ) {
     }
 
@@ -24,9 +28,30 @@ class ActivityLogService
         ?string $subjectId = null,
         ?string $details = null,
     ): void {
+        if ($this->shouldSkipDuplicateAuthEvent($user, $action)) {
+            return;
+        }
+
         $entry = $this->buildLogEntity($user, $action, $subject, $subjectId, $details);
         $this->entityManager->persist($entry);
         $this->entityManager->flush();
+    }
+
+    /**
+     * Record login/logout once per user within a short window (avoids duplicate rows).
+     */
+    public function logAuthEvent(
+        ?UserInterface $user,
+        string $action,
+        ?string $details = null,
+    ): void {
+        $this->log(
+            $user,
+            $action,
+            'User',
+            $this->resolveUserSubjectId($user),
+            $details ?? ($action === ActivityLog::ACTION_LOGIN ? 'User logged in' : 'User logged out')
+        );
     }
 
     /**
@@ -71,5 +96,37 @@ class ActivityLogService
         }
 
         return $roles[0] ?? 'ROLE_USER';
+    }
+
+    private function shouldSkipDuplicateAuthEvent(?UserInterface $user, string $action): bool
+    {
+        if (!\in_array($action, [ActivityLog::ACTION_LOGIN, ActivityLog::ACTION_LOGOUT], true)) {
+            return false;
+        }
+
+        $email = $this->resolveUserEmail($user);
+        if ($email === '') {
+            return false;
+        }
+
+        return $this->activityLogRepository->hasRecentAuthEvent($email, $action, self::AUTH_DEDUP_SECONDS);
+    }
+
+    private function resolveUserEmail(?UserInterface $user): string
+    {
+        if ($user instanceof User) {
+            return $user->getEmail() ?? $user->getUserIdentifier();
+        }
+
+        return $user?->getUserIdentifier() ?? '';
+    }
+
+    private function resolveUserSubjectId(?UserInterface $user): ?string
+    {
+        if ($user instanceof User && $user->getId() !== null) {
+            return (string) $user->getId();
+        }
+
+        return $user?->getUserIdentifier();
     }
 }

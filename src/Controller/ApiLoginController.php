@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
+use App\Service\ActivityLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,6 +21,7 @@ class ApiLoginController extends AbstractController
         UserPasswordHasherInterface $passwordHasher,
         JWTTokenManagerInterface $jwtManager,
         EntityManagerInterface $entityManager,
+        ActivityLogService $activityLogService,
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
@@ -53,6 +55,8 @@ class ApiLoginController extends AbstractController
         }
 
         $token = $jwtManager->create($user);
+
+        $activityLogService->logAuthEvent($user, \App\Entity\ActivityLog::ACTION_LOGIN, 'User logged in (mobile app)');
 
         return new JsonResponse([
             'success' => true,

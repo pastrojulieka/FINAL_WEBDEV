@@ -119,19 +119,8 @@ class LiveSnapshotService
         $now = new \DateTime();
         $lastWeek = (clone $now)->modify('-7 days');
 
-        $revenue = (float) ($this->orderRepository->createQueryBuilder('o')
-            ->select('SUM(o.total_amount)')
-            ->where('o.date >= :lastWeek')
-            ->setParameter('lastWeek', $lastWeek)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0);
-
-        $orders = (int) ($this->orderRepository->createQueryBuilder('o')
-            ->select('COUNT(o.id)')
-            ->where('o.date >= :lastWeek')
-            ->setParameter('lastWeek', $lastWeek)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0);
+        $revenue = $this->orderRepository->sumCompletedRevenueSince($lastWeek);
+        $orders = $this->orderRepository->countOrdersSince($lastWeek);
 
         $customers = (int) ($this->customerRepository->createQueryBuilder('c')
             ->select('COUNT(c.id)')

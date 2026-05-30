@@ -185,12 +185,17 @@ final class OrderController extends AbstractController
 
         $this->notifyCustomerAboutOrderUpdate($order, $previousStatus);
 
+        $statusMessage = sprintf('Set order #%d status to %s', $order->getId(), $newStatus);
+        if ($newStatus === Order::STATUS_COMPLETE) {
+            $statusMessage .= sprintf(' (₱%s added to revenue)', number_format($order->getTotalAmount() ?? 0, 2));
+        }
+
         $this->activityLogService->log(
             $this->getUser(),
             ActivityLog::ACTION_UPDATE,
             'Order',
             (string) $order->getId(),
-            sprintf('Set order #%d status to %s', $order->getId(), $newStatus)
+            $statusMessage
         );
 
         if ($request->isXmlHttpRequest()) {

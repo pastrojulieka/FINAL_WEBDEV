@@ -31,23 +31,14 @@ final class DashboardController extends AbstractController
         $lastWeek = (clone $now)->modify('-7 days');
         $twoWeeksAgo = (clone $now)->modify('-14 days');
 
-        // Total Revenue (current week)
-        $currentWeekRevenue = $orderRepository->createQueryBuilder('o')
-            ->select('SUM(o.total_amount)')
-            ->where('o.date >= :lastWeek')
-            ->setParameter('lastWeek', $lastWeek)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0;
+        // Total Revenue (completed orders only, current week)
+        $currentWeekRevenue = $orderRepository->sumCompletedRevenueSince($lastWeek);
 
-        // Previous week revenue for comparison
-        $previousWeekRevenue = $orderRepository->createQueryBuilder('o')
-            ->select('SUM(o.total_amount)')
-            ->where('o.date >= :twoWeeks')
-            ->andWhere('o.date < :lastWeek')
-            ->setParameter('twoWeeks', $twoWeeksAgo)
-            ->setParameter('lastWeek', $lastWeek)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 1;
+        // Previous week revenue for comparison (completed orders only)
+        $previousWeekRevenue = $orderRepository->sumCompletedRevenueBetween($twoWeeksAgo, $lastWeek);
+        if ($previousWeekRevenue <= 0) {
+            $previousWeekRevenue = 1;
+        }
 
         // Calculate revenue percentage change
         $revenueChange = $previousWeekRevenue > 0 
@@ -55,22 +46,13 @@ final class DashboardController extends AbstractController
             : 0;
 
         // Total Orders (current week)
-        $currentWeekOrders = $orderRepository->createQueryBuilder('o')
-            ->select('COUNT(o.id)')
-            ->where('o.date >= :lastWeek')
-            ->setParameter('lastWeek', $lastWeek)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0;
+        $currentWeekOrders = $orderRepository->countOrdersSince($lastWeek);
 
         // Previous week orders
-        $previousWeekOrders = $orderRepository->createQueryBuilder('o')
-            ->select('COUNT(o.id)')
-            ->where('o.date >= :twoWeeks')
-            ->andWhere('o.date < :lastWeek')
-            ->setParameter('twoWeeks', $twoWeeksAgo)
-            ->setParameter('lastWeek', $lastWeek)
-            ->getQuery()
-            ->getSingleScalarResult() ?? 1;
+        $previousWeekOrders = $orderRepository->countOrdersBetween($twoWeeksAgo, $lastWeek);
+        if ($previousWeekOrders <= 0) {
+            $previousWeekOrders = 1;
+        }
 
         // Calculate orders percentage change
         $ordersChange = $previousWeekOrders > 0 
@@ -103,7 +85,7 @@ final class DashboardController extends AbstractController
             [
                 'label' => 'Total Revenue',
                 'value' => '₱' . number_format($currentWeekRevenue, 2),
-                'desc' => sprintf('%+.1f%% vs last week', $revenueChange),
+                'desc' => sprintf('%+.1f%% vs last week · completed orders', $revenueChange),
                 'icon' => 'fa-peso-sign',
                 'trend' => $revenueChange >= 0 ? 'up' : 'down',
                 'gradient' => 'from-orange-500 to-orange-600'

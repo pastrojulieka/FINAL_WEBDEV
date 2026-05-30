@@ -11,7 +11,7 @@ use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 /**
- * Records LOGIN and LOGOUT for all users (viewing logs is admin-only).
+ * Records LOGIN and LOGOUT for web sessions (viewing logs is admin-only).
  */
 final class ActivityLogSecuritySubscriber implements EventSubscriberInterface
 {
@@ -30,42 +30,25 @@ final class ActivityLogSecuritySubscriber implements EventSubscriberInterface
 
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
-        $user = $event->getUser();
-        $subjectId = $this->resolveUserSubjectId($user);
+        if ($event->getFirewallName() !== 'main') {
+            return;
+        }
 
-        $this->activityLogService->log(
-            $user,
-            ActivityLog::ACTION_LOGIN,
-            'User',
-            $subjectId,
-            'User logged in'
-        );
+        $this->activityLogService->logAuthEvent($event->getUser(), ActivityLog::ACTION_LOGIN);
     }
 
     public function onLogout(LogoutEvent $event): void
     {
+        if ($event->getFirewallName() !== 'main') {
+            return;
+        }
+
         $token = $event->getToken();
         $user = $token?->getUser();
         if (!$user instanceof UserInterface) {
             return;
         }
 
-        $subjectId = $this->resolveUserSubjectId($user);
-        $this->activityLogService->log(
-            $user,
-            ActivityLog::ACTION_LOGOUT,
-            'User',
-            $subjectId,
-            'User logged out'
-        );
-    }
-
-    private function resolveUserSubjectId(UserInterface $user): ?string
-    {
-        if ($user instanceof User && $user->getId() !== null) {
-            return (string) $user->getId();
-        }
-
-        return $user->getUserIdentifier();
+        $this->activityLogService->logAuthEvent($user, ActivityLog::ACTION_LOGOUT);
     }
 }
