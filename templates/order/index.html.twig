@@ -477,6 +477,19 @@
           statusPill.textContent = select.value.charAt(0).toUpperCase() + select.value.slice(1);
           statusPill.className = statusPillClasses(select.value);
         }
+
+        if (payload.dashboard) {
+          window.dispatchEvent(new CustomEvent('dashboard:stats', {
+            detail: {
+              stats: payload.dashboard,
+              dashboardVersion: payload.dashboard_version,
+              showToast: select.value === 'complete',
+              toastMessage: select.value === 'complete'
+                ? 'Order completed — revenue updated on dashboard'
+                : 'Dashboard stats updated',
+            },
+          }));
+        }
       } catch (error) {
         select.value = previousValue;
         console.error('Status update failed:', error);

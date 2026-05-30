@@ -109,7 +109,14 @@ class ActivityLogService
             return false;
         }
 
-        return $this->activityLogRepository->hasRecentAuthEvent($email, $action, self::AUTH_DEDUP_SECONDS);
+        $subjectId = $this->resolveUserSubjectId($user);
+
+        return $this->activityLogRepository->hasRecentAuthEvent(
+            $email,
+            $action,
+            self::AUTH_DEDUP_SECONDS,
+            $subjectId
+        );
     }
 
     private function resolveUserEmail(?UserInterface $user): string

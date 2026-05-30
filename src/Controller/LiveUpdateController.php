@@ -54,41 +54,11 @@ final class LiveUpdateController extends AbstractController
             return $this->unchanged($version);
         }
 
-        $counts = $this->liveSnapshot->getDashboardCounts();
-        $now = new \DateTime();
-        $lastWeek = (clone $now)->modify('-7 days');
-        $twoWeeksAgo = (clone $now)->modify('-14 days');
-
-        $previousWeekRevenue = $orderRepository->sumCompletedRevenueBetween($twoWeeksAgo, $lastWeek);
-        if ($previousWeekRevenue <= 0) {
-            $previousWeekRevenue = 1;
-        }
-
-        $previousWeekOrders = $orderRepository->countOrdersBetween($twoWeeksAgo, $lastWeek);
-        if ($previousWeekOrders <= 0) {
-            $previousWeekOrders = 1;
-        }
-
-        $revenueChange = $previousWeekRevenue > 0
-            ? (($counts['revenue'] - $previousWeekRevenue) / $previousWeekRevenue) * 100
-            : 0;
-        $ordersChange = $previousWeekOrders > 0
-            ? (($counts['orders'] - $previousWeekOrders) / $previousWeekOrders) * 100
-            : 0;
-
         return new JsonResponse([
             'success' => true,
             'changed' => true,
             'version' => $version,
-            'stats' => [
-                'totalRevenue' => '₱'.number_format($counts['revenue'], 2),
-                'revenueDesc' => sprintf('%+.1f%% vs last week · completed', $revenueChange),
-                'totalOrders' => number_format($counts['orders']),
-                'ordersDesc' => sprintf('%+.1f%% vs last week', $ordersChange),
-                'totalCustomers' => number_format($counts['customers']),
-                'totalProducts' => number_format($counts['products']),
-                'totalStock' => number_format($counts['stock']),
-            ],
+            'stats' => $this->liveSnapshot->buildAdminDashboardStats($orderRepository),
             'activitiesHtml' => $this->renderView('live/_activities.html.twig', [
                 'activities' => $this->liveSnapshot->buildActivityFeed(8),
             ]),

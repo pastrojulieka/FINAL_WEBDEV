@@ -8,6 +8,7 @@ use App\Form\Order1Type;
 use App\Repository\OrderRepository;
 use App\Service\ActivityLogService;
 use App\Repository\UserRepository;
+use App\Service\LiveSnapshotService;
 use App\Service\PushNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,6 +23,8 @@ final class OrderController extends AbstractController
         private ActivityLogService $activityLogService,
         private PushNotificationService $pushNotificationService,
         private UserRepository $userRepository,
+        private LiveSnapshotService $liveSnapshot,
+        private OrderRepository $orderRepository,
     ) {
     }
 
@@ -199,12 +202,19 @@ final class OrderController extends AbstractController
         );
 
         if ($request->isXmlHttpRequest()) {
-            return $this->json([
+            $response = [
                 'success' => true,
                 'message' => 'Order status updated',
                 'status' => $newStatus,
                 'order_id' => $order->getId(),
-            ]);
+            ];
+
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $response['dashboard'] = $this->liveSnapshot->buildAdminDashboardStats($this->orderRepository);
+                $response['dashboard_version'] = $this->liveSnapshot->fingerprintDashboard();
+            }
+
+            return $this->json($response);
         }
 
         $this->addFlash('success', sprintf('Order #%d marked as %s.', $order->getId(), ucfirst($newStatus)));

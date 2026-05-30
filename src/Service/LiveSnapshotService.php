@@ -146,6 +146,42 @@ class LiveSnapshotService
         ];
     }
 
+    /**
+     * Stats payload for live admin dashboard polling and instant UI updates.
+     *
+     * @return array<string, string>
+     */
+    public function buildAdminDashboardStats(OrderRepository $orderRepository): array
+    {
+        $counts = $this->getDashboardCounts();
+        $now = new \DateTime();
+        $lastWeek = (clone $now)->modify('-7 days');
+        $twoWeeksAgo = (clone $now)->modify('-14 days');
+
+        $previousWeekRevenue = $orderRepository->sumCompletedRevenueBetween($twoWeeksAgo, $lastWeek);
+        if ($previousWeekRevenue <= 0) {
+            $previousWeekRevenue = 1;
+        }
+
+        $previousWeekOrders = $orderRepository->countOrdersBetween($twoWeeksAgo, $lastWeek);
+        if ($previousWeekOrders <= 0) {
+            $previousWeekOrders = 1;
+        }
+
+        $revenueChange = (($counts['revenue'] - $previousWeekRevenue) / $previousWeekRevenue) * 100;
+        $ordersChange = (($counts['orders'] - $previousWeekOrders) / $previousWeekOrders) * 100;
+
+        return [
+            'totalRevenue' => '₱'.number_format($counts['revenue'], 2),
+            'revenueDesc' => sprintf('%+.1f%% vs last week · completed', $revenueChange),
+            'totalOrders' => number_format($counts['orders']),
+            'ordersDesc' => sprintf('%+.1f%% vs last week', $ordersChange),
+            'totalCustomers' => number_format($counts['customers']),
+            'totalProducts' => number_format($counts['products']),
+            'totalStock' => number_format($counts['stock']),
+        ];
+    }
+
     public function fingerprintDashboard(): string
     {
         $counts = $this->getDashboardCounts();

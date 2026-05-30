@@ -52,21 +52,29 @@ class ActivityLogRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function hasRecentAuthEvent(string $userEmail, string $action, int $withinSeconds = 120): bool
-    {
+    public function hasRecentAuthEvent(
+        string $userEmail,
+        string $action,
+        int $withinSeconds = 120,
+        ?string $subjectId = null,
+    ): bool {
         $since = new \DateTimeImmutable(sprintf('-%d seconds', $withinSeconds));
 
-        $count = (int) $this->createQueryBuilder('a')
+        $qb = $this->createQueryBuilder('a')
             ->select('COUNT(a.id)')
-            ->where('a.userEmail = :email')
-            ->andWhere('a.action = :action')
+            ->where('a.action = :action')
             ->andWhere('a.createdAt >= :since')
-            ->setParameter('email', $userEmail)
             ->setParameter('action', $action)
-            ->setParameter('since', $since)
-            ->getQuery()
-            ->getSingleScalarResult();
+            ->setParameter('since', $since);
 
-        return $count > 0;
+        if ($subjectId !== null && $subjectId !== '') {
+            $qb->andWhere('a.subjectId = :subjectId')
+                ->setParameter('subjectId', $subjectId);
+        } else {
+            $qb->andWhere('a.userEmail = :email')
+                ->setParameter('email', $userEmail);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
     }
 }

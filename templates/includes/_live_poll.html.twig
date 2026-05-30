@@ -109,6 +109,46 @@
     pollUrl: null,
     version: '',
 
+    statMap: {
+      totalRevenue: 'liveTotalRevenue',
+      revenueDesc: 'liveRevenueDesc',
+      totalOrders: 'liveTotalOrders',
+      ordersDesc: 'liveOrdersDesc',
+      totalCustomers: 'liveTotalCustomers',
+      totalProducts: 'liveTotalProducts',
+      totalStock: 'liveTotalStock',
+      myOrders: 'liveMyOrders',
+      myProducts: 'liveMyProducts',
+      myStock: 'liveMyStock',
+      myCustomers: 'liveMyCustomers',
+      totalRecords: 'liveTotalRecords',
+    },
+
+    applyStats(stats, options) {
+      options = options || {};
+      if (!stats) return;
+
+      Object.keys(this.statMap).forEach((key) => {
+        if (Object.prototype.hasOwnProperty.call(stats, key)) {
+          const el = document.getElementById(this.statMap[key]);
+          if (el) el.textContent = stats[key];
+        }
+      });
+
+      if (options.activitiesHtml) {
+        const c = document.getElementById('liveActivities');
+        if (c) c.innerHTML = options.activitiesHtml;
+      }
+
+      if (options.dashboardVersion) {
+        this.version = options.dashboardVersion;
+      }
+
+      if (options.showToast) {
+        showToast('Dashboard updated', options.toastMessage || 'Revenue and stats updated automatically');
+      }
+    },
+
     async poll() {
       if (!this.pollUrl) return;
       try {
@@ -118,36 +158,11 @@
         if (data.changed) {
           const prev = this.version;
           this.version = data.version;
-
-          if (data.stats) {
-            const map = {
-              totalRevenue: 'liveTotalRevenue',
-              revenueDesc: 'liveRevenueDesc',
-              totalOrders: 'liveTotalOrders',
-              ordersDesc: 'liveOrdersDesc',
-              totalCustomers: 'liveTotalCustomers',
-              totalProducts: 'liveTotalProducts',
-              totalStock: 'liveTotalStock',
-              myOrders: 'liveMyOrders',
-              myProducts: 'liveMyProducts',
-              myStock: 'liveMyStock',
-              myCustomers: 'liveMyCustomers',
-              totalRecords: 'liveTotalRecords',
-            };
-            Object.keys(map).forEach((key) => {
-              if (data.stats[key]) {
-                const el = document.getElementById(map[key]);
-                if (el) el.textContent = data.stats[key];
-              }
-            });
-          }
-
-          if (data.activitiesHtml) {
-            const c = document.getElementById('liveActivities');
-            if (c) c.innerHTML = data.activitiesHtml;
-          }
-
-          if (prev) showToast('Dashboard updated', 'Revenue and stats updated automatically');
+          this.applyStats(data.stats, {
+            activitiesHtml: data.activitiesHtml,
+            showToast: !!prev,
+            toastMessage: 'Revenue and stats updated automatically',
+          });
         } else if (data.version) {
           this.version = data.version;
         }
@@ -162,5 +177,14 @@
       setInterval(() => this.poll(), POLL_MS);
     },
   };
+
+  window.addEventListener('dashboard:stats', function (event) {
+    if (!event.detail?.stats) return;
+    window.LiveDashboard.applyStats(event.detail.stats, {
+      dashboardVersion: event.detail.dashboardVersion,
+      showToast: !!event.detail.showToast,
+      toastMessage: event.detail.toastMessage,
+    });
+  });
 })();
 </script>
