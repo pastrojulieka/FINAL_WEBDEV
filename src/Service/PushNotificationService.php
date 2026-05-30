@@ -49,7 +49,11 @@ class PushNotificationService
         }
 
         $status = $order->getStatus();
-        $statusLabel = ucfirst($status);
+        $statusLabel = match ($status) {
+            Order::STATUS_COMPLETE => 'Complete',
+            Order::STATUS_CANCELLED => 'Cancelled',
+            default => 'Pending',
+        };
 
         $title = 'Order Status Updated';
         $body = sprintf(
@@ -60,11 +64,16 @@ class PushNotificationService
         );
 
         if ($previousStatus !== null && $previousStatus !== $status) {
+            $previousLabel = match ($previousStatus) {
+                Order::STATUS_COMPLETE => 'Complete',
+                Order::STATUS_CANCELLED => 'Cancelled',
+                default => 'Pending',
+            };
             $body = sprintf(
                 'Your order #%d (%s) changed from %s to %s.',
                 $order->getId(),
                 $order->getProductName() ?? 'Product',
-                ucfirst($previousStatus),
+                $previousLabel,
                 $statusLabel
             );
         }
